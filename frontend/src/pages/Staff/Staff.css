@@ -1,0 +1,17 @@
+/* Staff screen. It reuses the admin look (Admin.css); only a few extras live here. */
+.stfFile { display: flex; flex-direction: column; min-width: 0; max-width: 260px; }
+.stfFile b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stfFile small, .stfMeta { color: var(--ink3); font-size: 13px; }
+.stfNum { font-weight: 800; font-size: 16px; letter-spacing: .02em; }
+.stfActions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.stfLines { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.stfLines li span { color: var(--ink3); }
+.stfRowNow { background: var(--info-bg); }
+.adminApp .admModal.stfWide { max-width: 900px; }
+.stfPreview { width: 100%; min-height: 56vh; display: grid; place-items: center; background: var(--surface2); border-radius: 12px; overflow: hidden; }
+.stfPreview iframe { width: 100%; height: 62vh; border: 0; background: #fff; }
+.stfPreview img { max-width: 100%; max-height: 62vh; object-fit: contain; }
+.stfNoPreview { text-align: center; padding: 32px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--ink2); }
+.stfCallBar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.admNavLink { width: 100%; border: 0; background: transparent; text-align: left; cursor: pointer; font: inherit; }
+.admNavLink.active { background: var(--accent-soft); color: var(--accent); }

@@ -1,0 +1,422 @@
+/* printing page. Uses the colors from SelfCheckout.css */
+
+/* Scrolling content area */
+.printBody {
+  width: 100%;
+  max-width: 820px;
+  flex: 1 1 0;
+  min-height: 0;
+  margin: 1.25rem 0 1rem;
+  padding: 2px 4px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--colorCardBorder) transparent;
+}
+.printBody::-webkit-scrollbar { width: 8px; }
+.printBody::-webkit-scrollbar-thumb { background: var(--colorCardBorder); border-radius: 999px; }
+.printBody > * { flex-shrink: 0; }
+
+.prMuted { color: var(--colorTextMuted); }
+.prSmall { font-size: 0.85rem; margin-top: 2px; }
+.prClip { max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* queue strip */
+.prQueueStrip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.prStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 16px;
+  border-radius: 1.1rem;
+  background: var(--colorCardBg);
+  border: 1px solid var(--colorCardBorder);
+}
+.prStatLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--colorTextMuted);
+}
+.prStat strong { font-size: 1.35rem; color: var(--colorBrand); }
+
+/* cards */
+.prCard {
+  background: var(--colorCardBg);
+  border: 2px solid var(--colorCardBorder);
+  border-radius: 1.5rem;
+  padding: 1.25rem 1.5rem 1.5rem;
+  box-shadow: 0 10px 25px -5px var(--shadowDepth);
+}
+
+.prCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+.prNum {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--colorBrand);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.prLabel { font-weight: 700; font-size: 1.05rem; margin: 1.1rem 0 0.6rem; }
+.prLabel.noMargin { margin: 0; }
+.prCard .prLabel:first-of-type { margin-top: 0; }
+
+.prRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--colorCardBorder);
+}
+.prRow .prLabel { margin: 0; }
+
+/* file drop */
+.prDrop {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 2.2rem 1rem;
+  border-radius: 1.25rem;
+  border: 3px dashed var(--colorBrand);
+  background: color-mix(in srgb, var(--colorBrand) 8%, transparent);
+  color: var(--colorBrand);
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
+}
+.prDrop:active { transform: scale(0.99); background: color-mix(in srgb, var(--colorBrand) 16%, transparent); }
+.prDropTitle { font-size: 1.4rem; font-weight: 800; }
+.prDropHint { color: var(--colorTextSub); font-size: 1rem; }
+.prDropTypes { color: var(--colorTextMuted); font-size: 0.8rem; margin-top: 4px; }
+
+.prFileRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 1.1rem;
+  background: var(--colorBg);
+  border: 1px solid var(--colorCardBorder);
+}
+.prFileIcon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  font-size: 1.9rem;
+  border-radius: 16px;
+  background: var(--colorCardBg);
+  border: 1px solid var(--colorCardBorder);
+}
+.prFileInfo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.prFileName { font-weight: 700; font-size: 1.1rem; }
+
+.prGhost {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid var(--colorButtonBorder);
+  background: var(--colorButtonBg);
+  color: var(--colorTextMain);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.prGhost.danger { color: var(--dangerBtn); border-color: var(--dangerBtn); padding: 0 14px; }
+.prGhost:active { transform: scale(0.95); }
+
+/* stepper pill */
+.prStepper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--colorBg);
+  border: 1px solid var(--colorCardBorder);
+}
+.prStepper button {
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--colorTextMain);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.08s, background 0.12s;
+}
+.prStepper button:active:not(:disabled) { transform: scale(0.88); background: var(--colorCardActive); }
+.prStepper button:disabled { opacity: 0.3; cursor: default; }
+.prStepper .prStepNum {
+  width: auto;
+  min-width: 64px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--colorCardBg);
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+/* color choice tiles */
+.prChoices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.prChoice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 1.1rem;
+  border: 2px solid var(--colorCardBorder);
+  background: var(--colorBg);
+  color: var(--colorTextMain);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+.prChoice:active { transform: scale(0.98); }
+.prChoice.active {
+  border-color: var(--colorBrand);
+  background: color-mix(in srgb, var(--colorBrand) 12%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--colorBrand) 22%, transparent);
+}
+.prChoiceText { display: flex; flex-direction: column; gap: 2px; font-size: 1.05rem; }
+.prSwatch { width: 44px; height: 44px; border-radius: 50%; flex: 0 0 auto; border: 2px solid var(--colorCardBorder); }
+.prSwatch.bw { background: linear-gradient(135deg, #ffffff 0 50%, #1f2937 50% 100%); }
+.prSwatch.color { background: conic-gradient(#ef4444, #f59e0b, #22c55e, #38bdf8, #8b5cf6, #ef4444); }
+
+/* paper size segmented */
+.prSeg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 5px;
+  border-radius: 1.1rem;
+  background: var(--colorBg);
+  border: 1px solid var(--colorCardBorder);
+}
+.prSeg button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 10px 6px;
+  border: 0;
+  border-radius: 0.85rem;
+  background: transparent;
+  color: var(--colorTextSub);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.prSeg button strong { font-size: 1.1rem; }
+.prSeg button span { font-size: 0.72rem; opacity: 0.8; }
+.prSeg button.active { background: var(--colorBrand); color: #fff; box-shadow: 0 4px 12px var(--shadowDepth); }
+
+/* summary + primary button */
+.prSummary {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px 14px 22px;
+  border-radius: 1.4rem;
+  background: var(--colorCardBg);
+  border: 2px solid var(--colorCardBorder);
+  box-shadow: 0 10px 25px -5px var(--shadowDepth);
+}
+.prSummaryText { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.prSummaryTitle { font-weight: 800; font-size: 1.05rem; }
+.prTotal { font-size: 2rem; font-weight: 900; color: var(--colorBrand); }
+
+.prPrimary {
+  min-height: 62px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 1rem;
+  background: var(--colorBrand);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 6px 16px var(--shadowDepth);
+  transition: transform 0.1s, filter 0.15s;
+}
+.prPrimary:active:not(:disabled) { transform: scale(0.97); filter: brightness(0.9); }
+.prPrimary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ticket */
+.ticketBody { align-items: center; justify-content: center; gap: 18px; }
+
+.prTicket {
+  width: min(460px, 100%);
+  border-radius: 1.75rem;
+  background: var(--colorCardBg);
+  border: 2px solid var(--colorCardBorder);
+  box-shadow: 0 20px 50px -10px var(--shadowDepth);
+  overflow: hidden;
+  animation: ticketIn 0.25s ease-out;
+}
+@keyframes ticketIn { from { transform: translateY(14px) scale(0.97); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.prTicketTop { padding: 1.75rem 1.5rem 1.25rem; text-align: center; }
+.prTicketCheck {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 0.6rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #fff;
+}
+.prTicketTop h2 { font-size: 1.6rem; font-weight: 800; }
+.prTicketNumber {
+  margin: 0.2rem 0 0.4rem;
+  font-size: 5rem;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--colorBrand);
+}
+.prTicketWait { font-weight: 700; color: var(--colorTextSub); }
+
+.prTicketTear {
+  position: relative;
+  height: 0;
+  border-top: 3px dashed var(--colorCardBorder);
+}
+.prTicketTear::before,
+.prTicketTear::after {
+  content: '';
+  position: absolute;
+  top: -15px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--colorBg);
+  border: 2px solid var(--colorCardBorder);
+}
+.prTicketTear::before { left: -15px; }
+.prTicketTear::after { right: -15px; }
+
+.prTicketBottom { padding: 1.25rem 1.5rem 1.5rem; display: flex; flex-direction: column; gap: 10px; }
+.prTicketRow { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--colorTextMuted); }
+.prTicketRow strong { color: var(--colorTextMain); }
+.prTicketRow.total {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--colorCardBorder);
+  font-size: 1.15rem;
+}
+.prTicketRow.total strong { font-size: 1.6rem; color: var(--colorBrand); }
+.prTicketNote { margin-top: 6px; text-align: center; font-size: 0.95rem; color: var(--colorTextSub); line-height: 1.4; }
+
+.prTicketActions { display: flex; gap: 12px; align-items: center; }
+
+/* narrow screens */
+@media (max-width: 640px) {
+  .prChoices { grid-template-columns: 1fr; }
+  .prSummary { grid-template-columns: 1fr auto; }
+  .prSummary .prPrimary { grid-column: 1 / -1; }
+  .prQueueStrip { gap: 6px; }
+  .prStat { padding: 10px 12px; }
+  .prTicketNumber { font-size: 4rem; }
+}
+
+
+/* scrolling title (long file names slide back and forth) */
+.marquee {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.marqueeInner { display: inline-block; will-change: transform; }
+.marqueeInner.run {
+  animation: marqueeSlide var(--dur, 8s) ease-in-out infinite alternate;
+}
+@keyframes marqueeSlide {
+  0%, 15%   { transform: translateX(0); }
+  85%, 100% { transform: translateX(var(--dist, 0)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee { text-overflow: ellipsis; }
+  .marqueeInner.run { animation: none; }
+}
+.prClip { min-width: 0; max-width: 60%; display: block; }
+
+/* view button */
+.prGhost.view { color: var(--colorBrand); border-color: var(--colorBrand); }
+.prViewBtn { align-self: center; margin-top: 4px; }
+
+/* customer file preview */
+.prPreviewOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(5px);
+}
+.prPreviewCard {
+  width: min(900px, 100%);
+  height: min(90vh, 860px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--colorCardBg);
+  color: var(--colorTextMain);
+  border: 1px solid var(--colorCardBorder);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+.prPreviewHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--colorCardBorder);
+}
+.prPreviewTitle { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; font-size: 1.15rem; font-weight: 800; }
+.prPreviewTitle > span[aria-hidden] { font-size: 1.6rem; }
+.prPreviewBody {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  background: var(--colorBg);
+  overflow: auto;
+}
+.prPreviewBody iframe { width: 100%; height: 100%; border: 0; background: #fff; }
+.prPreviewBody img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.prPreviewFoot { padding: 12px 18px; border-top: 1px solid var(--colorCardBorder); display: flex; justify-content: flex-end; }
+.prPreviewFoot .prPrimary { min-height: 54px; }
+
+.prNoPreview { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 2rem; text-align: center; max-width: 440px; }
+.prNoPreviewIcon { font-size: 4rem; }

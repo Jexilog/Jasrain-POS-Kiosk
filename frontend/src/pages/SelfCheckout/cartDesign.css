@@ -1,0 +1,214 @@
+/* cart rows (not imported, same styles are in SelfCheckout.css) */
+
+.cartStack,
+.qtyPadCard {
+  --row: #131c31;
+  --pill: #1d2842;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --line: rgba(255, 255, 255, 0.07);
+  --accent: #38bdf8;
+  --danger: #f87171;
+  font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+.lightMode .cartStack,
+.lightMode .qtyPadCard {
+  --row: #ffffff;
+  --pill: #eef1f6;
+  --text: #0f172a;
+  --muted: #64748b;
+  --line: rgba(15, 23, 42, 0.08);
+  --accent: #0284c7;
+  --danger: #dc2626;
+}
+
+.cartStack {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* row */
+.cartCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 20px;
+  background: var(--row);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.cartThumb {
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  font-size: 1.9rem;
+  border-radius: 16px;
+  background: var(--pill);
+  overflow: hidden;
+}
+.cartThumb img { width: 100%; height: 100%; object-fit: contain; }
+
+.cartInfo {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cartName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cartUnit { font-size: 0.85rem; color: var(--muted); }
+
+/* quantity pill */
+.qtyPill {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--pill);
+}
+.qtyPillBtn {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.08s;
+}
+.qtyPillBtn:active:not(:disabled) { transform: scale(0.88); background: rgba(128, 128, 128, 0.25); }
+.qtyPillBtn:disabled { opacity: 0.3; cursor: default; }
+
+.qtyPillNum {
+  min-width: 52px;
+  height: 42px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--row);
+  color: var(--text);
+  font-size: 1.25rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.qtyPillNum:active { transform: scale(0.94); }
+
+.cartLine {
+  flex: 0 0 auto;
+  min-width: 96px;
+  text-align: right;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.cartRemove {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.cartRemove:hover,
+.cartRemove:active { background: rgba(248, 113, 113, 0.14); color: var(--danger); }
+
+/* type-quantity popup */
+.qtyPadOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+}
+.qtyPadCard {
+  width: min(360px, 100%);
+  padding: 22px 20px 18px;
+  border-radius: 28px;
+  background: #101728;
+  color: var(--text);
+  border: 1px solid var(--line);
+  text-align: center;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+}
+.lightMode .qtyPadCard { background: #ffffff; }
+
+.qtyPadTitle { font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.qtyPadItem { margin-top: 2px; font-size: 1.2rem; font-weight: 700; }
+
+.qtyPadDisplay {
+  margin: 14px 0;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  font-size: 3.4rem;
+  font-weight: 800;
+  border-radius: 22px;
+  background: var(--pill);
+  border: 2px solid var(--accent);
+}
+.qtyPadDisplay.empty { color: var(--muted); }
+
+.qtyPadGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.qtyPadKey {
+  min-height: 58px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--pill);
+  color: var(--text);
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.08s;
+}
+.qtyPadKey:active { transform: scale(0.93); }
+.qtyPadKey.ok { background: var(--accent); color: #fff; }
+
+.qtyPadActions { display: flex; gap: 10px; margin-top: 12px; }
+.qtyPadActions button {
+  flex: 1;
+  min-height: 54px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--pill);
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.qtyPadActions .qtyPadSave { flex: 2; background: var(--accent); color: #fff; }
+
+/* narrow screens */
+@media (max-width: 560px) {
+  .cartCard { flex-wrap: wrap; row-gap: 10px; }
+  .cartInfo { flex-basis: calc(100% - 140px); }
+  .cartLine { margin-left: auto; }
+}

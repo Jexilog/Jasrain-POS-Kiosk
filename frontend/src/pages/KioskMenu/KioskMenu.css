@@ -1,0 +1,267 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+/* theme colors */
+.kioskScreen.darkMode {
+  --colorBg: #0f172a;
+  --bgGradient: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+  --colorBrand: #38bdf8;
+  --colorIcon: #7dd3fc;
+  --colorTextMain: #ffffff;
+  --colorTextSub: #cbd5e1;
+  --colorTextMuted: #94a3b8;
+  --colorCardBg: #1e293b;
+  --colorCardBorder: #334155;
+  --colorCardActive: #334155;
+  --colorButtonBg: #1e293b;
+  --colorButtonBorder: #475569;
+  --shadowDepth: rgba(0, 0, 0, 0.4);
+}
+
+.kioskScreen.lightMode {
+  --colorBg: #f8fafc;
+  --bgGradient: radial-gradient(circle at top, #ffffff 0%, #f1f5f9 100%);
+  --colorBrand: #0284c7;
+  --colorIcon: #0369a1;
+  --colorTextMain: #0f172a;
+  --colorTextSub: #334155;
+  --colorTextMuted: #64748b;
+  --colorCardBg: #ffffff;
+  --colorCardBorder: #cbd5e1;
+  --colorCardActive: #e2e8f0;
+  --colorButtonBg: #ffffff;
+  --colorButtonBorder: #cbd5e1;
+  --shadowDepth: rgba(0, 0, 0, 0.08);
+}
+
+/* main screen shell */
+.kioskScreen {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1.5rem 2rem 3rem 2rem;
+  background: var(--bgGradient);
+  background-color: var(--colorBg);
+  color: var(--colorTextMain);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* top bar */
+.topBar {
+  width: 100%;
+  max-width: 820px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.themeButton {
+  background-color: var(--colorButtonBg);
+  border: 1px solid var(--colorButtonBorder);
+  color: var(--colorTextSub);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--shadowDepth);
+  transition: all 0.2s ease;
+}
+
+.themeButton:active {
+  transform: scale(0.95);
+}
+
+/* header section */
+.storeHeader {
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.welcomeText {
+  font-size: 1.1rem;
+  letter-spacing: 0.25em;
+  color: var(--colorTextMuted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.brandTitle {
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  color: var(--colorBrand);
+  margin: 0.25rem 0 0 0;
+  line-height: 1;
+}
+
+.brandSubtitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--colorTextSub);
+  margin-top: 0.5rem;
+}
+
+.instructionText {
+  font-size: 1.35rem;
+  color: var(--colorTextMuted);
+  margin-top: 1rem;
+  font-weight: 400;
+}
+
+/* options grid */
+.menuGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 360px));
+  gap: 2rem;
+  width: 100%;
+  max-width: 820px;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.serviceCard {
+  background-color: var(--colorCardBg);
+  border: 2px solid var(--colorCardBorder);
+  border-radius: 1.5rem;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  box-shadow: 0 10px 25px -5px var(--shadowDepth);
+}
+
+.serviceCard:active {
+  transform: scale(0.97);
+  border-color: var(--colorBrand);
+  background-color: var(--colorCardActive);
+}
+
+.cardIcon {
+  font-size: 4rem;
+  margin-bottom: 1.25rem;
+}
+
+.cardTitle {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--colorTextMain);
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.025em;
+}
+
+.cardDescription {
+  font-size: 1rem;
+  color: var(--colorTextMuted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* footer section */
+.footerBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 820px;
+  padding: 0 0.5rem;
+}
+
+.utilityButton {
+  background-color: var(--colorButtonBg);
+  border: 1px solid var(--colorButtonBorder);
+  color: var(--colorTextSub);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--shadowDepth);
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.utilityButton:active {
+  transform: scale(0.95);
+  background-color: var(--colorCardActive);
+}
+
+.buttonIcon {
+  font-size: 1.2rem;
+}
+
+/* help modal backdrop */
+.helpModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* help modal content box */
+.helpModalContent {
+  background-color: var(--colorCardBg);
+  color: var(--colorTextMain);
+  border: 1px solid var(--colorCardBorder);
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  text-align: left;
+}
+
+.helpModalTitle {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--colorTextMain);
+}
+
+.helpModalBody p {
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+  color: var(--colorTextSub);
+}
+
+.helpModalCloseButton {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--colorBrand);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.helpModalCloseButton:active {
+  transform: scale(0.98);
+  filter: brightness(0.9);
+}
+
+/* icons: brighter than the text so they stand out in both themes */
+.cardIcon,
+.buttonIcon,
+.themeButton .ico {
+  color: var(--colorIcon);
+}

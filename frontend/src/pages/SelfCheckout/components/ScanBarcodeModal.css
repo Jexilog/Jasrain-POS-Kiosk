@@ -1,0 +1,59 @@
+.scanModal { max-width: 560px; }
+.scanStage {
+  position: relative; height: 170px; margin: 4px 0 14px; border-radius: 1.2rem; overflow: hidden;
+  display: grid; place-items: center;
+  background: var(--colorBg); border: 2px dashed var(--colorCardBorder);
+  transition: border-color 0.2s, background 0.2s;
+}
+.scanStage.ok { border-color: #1f8a4c; border-style: solid; background: rgba(31, 138, 76, 0.12); }
+.scanStage.bad { border-color: #c92a2a; border-style: solid; background: rgba(201, 42, 42, 0.12); }
+.scanBars { font-size: 4.2rem; letter-spacing: 0.08em; color: var(--colorTextMuted); opacity: 0.55; white-space: nowrap; }
+.scanBeam {
+  position: absolute; left: 6%; right: 6%; height: 3px; border-radius: 3px; background: #e5484d;
+  box-shadow: 0 0 14px 3px rgba(229, 72, 77, 0.6);
+  animation: scanSweep 1.8s ease-in-out infinite alternate;
+}
+@keyframes scanSweep { from { top: 14%; } to { top: 84%; } }
+@media (prefers-reduced-motion: reduce) { .scanBeam { animation: none; top: 50%; } }
+.scanTitle { text-align: center; font-size: 1.5rem; font-weight: 800; margin: 0; }
+.scanHint { text-align: center; color: var(--colorTextMuted); margin: 4px 0 12px; }
+.scanResult {
+  min-height: 52px; display: grid; place-items: center; text-align: center; padding: 10px 14px; margin-bottom: 14px;
+  border-radius: 1rem; background: var(--colorBg); border: 1px solid var(--colorCardBorder); color: var(--colorTextSub); font-size: 1.05rem;
+}
+.scanResult.small { min-height: 40px; padding: 6px 12px; margin: 8px 0; font-size: 0.95rem; }
+.scanResult.ok { color: #1f8a4c; border-color: #1f8a4c; }
+.scanResult.bad { color: #c92a2a; border-color: #c92a2a; }
+
+.mockScan { border: 2px dashed var(--colorCardBorder); border-radius: 1rem; padding: 10px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px; }
+.mockTag { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.06em; color: var(--colorTextMuted); }
+.mockRow { display: flex; gap: 8px; flex-wrap: wrap; }
+.mockBtn { flex: 1; min-height: 46px; border-radius: 0.8rem; border: 1px solid var(--colorButtonBorder); background: var(--colorButtonBg); color: var(--colorTextMain); font-weight: 800; cursor: pointer; padding: 0 12px; }
+.mockBtn.main { background: var(--colorBrand); border-color: var(--colorBrand); color: #fff; }
+.mockChips { display: flex; flex-wrap: wrap; gap: 6px; max-height: 110px; overflow-y: auto; }
+.mockChip { min-height: 38px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--colorButtonBorder); background: var(--colorButtonBg); color: var(--colorTextMain); font-weight: 600; cursor: pointer; }
+.mockChip:disabled { opacity: 0.4; cursor: not-allowed; }
+.mockChip:active, .mockBtn:active { transform: scale(0.96); }
+
+/* quantity + suggestions */
+.scanAdded { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; text-align: left; }
+.scanAddedText { flex: 1; min-width: 0; }
+.scanAddedQty { display: flex; align-items: center; gap: 8px; color: var(--colorTextSub); }
+.scanAddedQty small { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.scanStepper { display: inline-flex; align-items: center; border: 1px solid var(--colorButtonBorder); border-radius: 999px; background: var(--colorButtonBg); overflow: hidden; }
+.scanStepper button { width: 46px; height: 46px; border: 0; background: transparent; color: var(--colorTextMain); font-size: 1.5rem; font-weight: 700; cursor: pointer; }
+.scanStepper button:disabled { opacity: 0.3; cursor: not-allowed; }
+.scanStepper button:active:not(:disabled) { background: var(--colorBg); }
+.scanStepper span { min-width: 44px; text-align: center; font-size: 1.3rem; font-weight: 800; color: var(--colorTextMain); }
+.scanQtyRow { display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px; font-weight: 700; color: var(--colorTextSub); }
+.scanSuggest { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.scanSuggestNone { padding: 10px 12px; color: var(--colorTextMuted); text-align: center; }
+.scanSuggestItem { width: 100%; min-height: 56px; display: flex; align-items: center; gap: 12px; padding: 6px 12px; text-align: left; border-radius: 0.9rem; border: 1px solid var(--colorButtonBorder); background: var(--colorButtonBg); color: var(--colorTextMain); cursor: pointer; }
+.scanSuggestItem:disabled { opacity: 0.45; cursor: not-allowed; }
+.scanSuggestItem:active:not(:disabled) { transform: scale(0.98); }
+.scanSuggestEmoji { font-size: 1.6rem; }
+.scanSuggestText { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.scanSuggestText b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scanSuggestText code { font-size: 0.85rem; color: var(--colorTextMuted); }
+.scanSuggestText mark { background: rgba(56, 189, 248, 0.3); color: inherit; border-radius: 3px; padding: 0 1px; }
+.scanSuggestPrice { font-weight: 800; color: var(--colorBrand); white-space: nowrap; }
