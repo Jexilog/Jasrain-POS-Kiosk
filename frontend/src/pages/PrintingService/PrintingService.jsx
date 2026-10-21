@@ -36,6 +36,21 @@ const fileIconName = (name) => {
   return ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(e) ? 'file' : 'image';
 };
  
+<<<<<<< HEAD
+=======
+const fileEmoji = (name) => {
+  const e = extOf(name);
+
+  if (e === 'pdf') return '📕';
+  if (['doc', 'docx'].includes(e)) return '📝';
+  if (['xls', 'xlsx'].includes(e)) return '📊';
+  if (['ppt', 'pptx'].includes(e)) return '📽️';
+  if (['jpg', 'jpeg', 'png'].includes(e)) return '🖼️';
+
+  return '📄';
+};
+
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
 // Tries to count PDF pages. Returns null when it can't tell.
 async function detectPages(file) {
   const e = extOf(file.name);
@@ -156,6 +171,7 @@ export default function Printing() {
     setSaving(true);
  
     const ahead = queue.filter((q) => q.status === 'Waiting' || q.status === 'Printing').length;
+<<<<<<< HEAD
     const job = addQueue({
       fileName: file.name,
       fileSize: file.size,
@@ -171,6 +187,26 @@ export default function Printing() {
       change: cash.change,
       changeGiven: cash.change === 0,
     });
+=======
+    let job;
+    try {
+      job = await addQueue({
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        pages,
+        copies,
+        color,
+        paperSize: paper,
+        payment: 'Cash',
+        cashReceived: cash.received,
+      });
+    } catch (err) {
+      setSaving(false);
+      toast.error(`${err.message} Please call staff.`);
+      return;
+    }
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
  
     try {
       // Store the actual file so staff can open it from the staff screen

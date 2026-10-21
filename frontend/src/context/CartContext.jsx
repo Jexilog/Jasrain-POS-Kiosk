@@ -1,11 +1,19 @@
 import React, { createContext, useContext, useState } from 'react';
 import { calculateTotal } from '../utils/calculateTotal';
+<<<<<<< HEAD
 import { findProduct } from '../utils/productCatalog';
+=======
+import { useProducts } from './ProductContext';
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
 
 const CartContext = createContext();
 
 // Cart item shape: { barcode, name, price (unit), quantity }
 export function CartProvider({ children }) {
+<<<<<<< HEAD
+=======
+  const { findByBarcode } = useProducts();
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
   const [cart, setCart] = useState([]);
 
   const addToCart = (product, qty = 1) => {
@@ -25,9 +33,15 @@ export function CartProvider({ children }) {
   // Use this with the barcode scanner
   // Returns true if the item was added, false if the barcode is unknown
   const addItemByBarcode = (barcode) => {
+<<<<<<< HEAD
     const product = findProduct(barcode);
     if (!product) return false;
     addToCart(product);
+=======
+    const product = findByBarcode(barcode);
+    if (!product) return false;
+    addToCart({ barcode: product.barcode, name: product.name, price: product.price });
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
     return true;
   };
 

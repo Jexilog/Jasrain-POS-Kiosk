@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { products as seed } from '../utils/products';
 
@@ -8,6 +9,18 @@ const LOG_KEEP = 3000;
 
 // Product shape:
 // { barcode, name, price, cost, category, image, stock, critical, active, createdAt }
+=======
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { api } from '../api';
+import { usePolling } from '../hooks/usePolling';
+import { useAuth } from './AuthContext';
+
+const ProductContext = createContext();
+
+// Product shape:
+// { barcode, name, price, cost, category, image, stock, critical, active, createdAt }
+// (customers do not get the cost, so it is 0 on the kiosk)
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
 const clean = (p) => ({
   barcode: String(p.barcode ?? '').trim(),
   name: String(p.name ?? '').trim(),
@@ -21,6 +34,7 @@ const clean = (p) => ({
   createdAt: p.createdAt || new Date().toISOString(),
 });
 
+<<<<<<< HEAD
 function loadProducts() {
   try {
     const saved = JSON.parse(localStorage.getItem(PKEY));
@@ -95,6 +109,45 @@ export function ProductProvider({ children }) {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
+=======
+// turns a failed request into the { ok, error } the forms expect
+const failed = (e) => ({ ok: false, error: e.message });
+
+export function ProductProvider({ children }) {
+  const { isAuthenticated } = useAuth();
+  const [products, setProducts] = useState([]);
+  const [log, setLog] = useState([]);
+  const pRef = useRef(products);
+
+  const refreshProducts = useCallback(async () => {
+    try {
+      const next = (await api.get('/products')).map(clean);
+      pRef.current = next;
+      setProducts(next);
+    } catch (e) {
+      /* the server is not reachable right now, keep what we have */
+    }
+  }, []);
+
+  const refreshLog = useCallback(async () => {
+    if (!isAuthenticated) {
+      setLog([]);
+      return;
+    }
+    try {
+      setLog(await api.get('/stock/log'));
+    } catch (e) {
+      /* keep the old log */
+    }
+  }, [isAuthenticated]);
+
+  // stock changes at the kiosk show up here without a refresh
+  usePolling(refreshProducts, 8000, String(isAuthenticated));
+  usePolling(refreshLog, 15000, String(isAuthenticated));
+
+  const refreshAll = () => Promise.all([refreshProducts(), refreshLog()]);
+
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
   // reading
   const activeProducts = useMemo(() => products.filter((p) => p.active), [products]);
 
@@ -106,17 +159,26 @@ export function ProductProvider({ children }) {
     return ['All', ...seen];
   }, [activeProducts]);
 
+<<<<<<< HEAD
   // newest data, active products only (what a customer can buy)
+=======
+  // active products only (what a customer can buy)
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
   const findByBarcode = (code) => {
     const c = String(code ?? '').trim();
     return pRef.current.find((p) => p.active && p.barcode === c) || null;
   };
+<<<<<<< HEAD
   // newest data, including archived products
+=======
+  // including archived products
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
   const getProduct = (code) => {
     const c = String(code ?? '').trim();
     return pRef.current.find((p) => p.barcode === c) || null;
   };
 
+<<<<<<< HEAD
   // stock
   // changes: [{ barcode, delta } or { barcode, setTo }, reason, note]
   const applyMovements = (changes, by = 'Admin') => {
@@ -149,10 +211,19 @@ export function ProductProvider({ children }) {
       commitProducts(next);
       commitLog(entries);
     }
+=======
+  // stock (admin only)
+  // changes: [{ barcode, delta } or { barcode, setTo }, reason, note]
+  // throws if the server refuses, so the caller can show the message
+  const applyMovements = async (changes) => {
+    const entries = await api.post('/stock/adjust', { changes });
+    await refreshAll();
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
     return entries;
   };
 
   // managing products
+<<<<<<< HEAD
   const validate = (p, ignoreBarcode) => {
     if (!p.name) return 'Please enter a product name.';
     if (!p.barcode) return 'Please enter a barcode (or tap Generate).';
@@ -231,6 +302,60 @@ export function ProductProvider({ children }) {
       }
     });
     return summary;
+=======
+  const addProduct = async (data) => {
+    try {
+      await api.post('/products', clean({ ...data, stock: data.stock }));
+      await refreshAll();
+      return { ok: true };
+    } catch (e) {
+      return failed(e);
+    }
+  };
+
+  // stock and barcode are not changed here (use Adjust stock for stock)
+  const updateProduct = async (barcode, changes) => {
+    const current = pRef.current.find((p) => p.barcode === barcode);
+    if (!current) return { ok: false, error: 'Product not found.' };
+    try {
+      await api.put(`/products/${encodeURIComponent(barcode)}`, clean({ ...current, ...changes, barcode }));
+      await refreshProducts();
+      return { ok: true };
+    } catch (e) {
+      return failed(e);
+    }
+  };
+
+  const setActive = async (barcode, active) => {
+    try {
+      await api.patch(`/products/${encodeURIComponent(barcode)}/active`, { active });
+      await refreshProducts();
+      return { ok: true };
+    } catch (e) {
+      return failed(e);
+    }
+  };
+
+  const deleteProduct = async (barcode) => {
+    try {
+      await api.del(`/products/${encodeURIComponent(barcode)}`);
+      await refreshAll();
+      return { ok: true };
+    } catch (e) {
+      return failed(e);
+    }
+  };
+
+  // rows come from parseCSV (lower-case column names)
+  const importProducts = async (rows) => {
+    try {
+      const summary = await api.post('/products/import', { rows });
+      await refreshAll();
+      return summary;
+    } catch (e) {
+      return { added: 0, updated: 0, errors: [e.message] };
+    }
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
   };
 
   return (
@@ -242,6 +367,10 @@ export function ProductProvider({ children }) {
         log,
         findByBarcode,
         getProduct,
+<<<<<<< HEAD
+=======
+        refreshProducts: refreshAll,
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
         applyMovements,
         addProduct,
         updateProduct,

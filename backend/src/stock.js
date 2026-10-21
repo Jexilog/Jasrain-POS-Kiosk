@@ -30,7 +30,13 @@ export async function applyMovements(conn, changes, by = 'Admin', orderNumber = 
 // next number like A001 or P001
 export async function nextNumber(conn, table, column, prefix) {
   const [rows] = await conn.query(
+<<<<<<< HEAD
     `SELECT COALESCE(MAX(CAST(SUBSTRING(${column}, 2) AS UNSIGNED)), 0) + 1 AS n FROM ${table} FOR UPDATE`
+=======
+    `SELECT COALESCE(MAX(CAST(SUBSTRING(${column}, 2) AS UNSIGNED)), 0) + 1 AS n
+     FROM ${table} WHERE ${column} LIKE ? FOR UPDATE`,
+    [`${prefix}%`]
+>>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
   );
   return prefix + String(rows[0].n).padStart(3, '0');
 }

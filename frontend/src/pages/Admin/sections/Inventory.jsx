@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useProducts } from '../../../context/ProductContext';
-import { useAuth } from '../../../context/AuthContext';
 import { useReport } from '../../../hooks/useReport';
 import { stockStatus, STOCK } from '../../../utils/analytics';
 import { toCSV, downloadText } from '../../../utils/csv';
@@ -102,7 +101,6 @@ function AdjustModal({ product, onClose, onSave }) {
 // page
 export default function Inventory() {
   const { products, log, applyMovements } = useProducts();
-  const { admin } = useAuth();
   const stats30 = useReport('30d').stats;
   const [params, setParams] = useSearchParams();
 
@@ -179,11 +177,15 @@ export default function Inventory() {
 
   const logReasons = useMemo(() => ['All', ...Array.from(new Set(log.map((l) => l.reason))).sort()], [log]);
 
-  const save = (change) => {
-    const done = applyMovements([change], admin?.username || 'Admin');
-    if (done.length) toast.success(`${done[0].name}: stock is now ${done[0].stockAfter}`);
-    else toast.info('Nothing changed.');
-    setAdjusting(null);
+  const save = async (change) => {
+    try {
+      const done = await applyMovements([change]);
+      if (done.length) toast.success(`${done[0].name}: stock is now ${done[0].stockAfter}`);
+      else toast.info('Nothing changed.');
+      setAdjusting(null);
+    } catch (err) {
+      toast.error(err.message);
+    }
   };
 
   const exportStock = () => {

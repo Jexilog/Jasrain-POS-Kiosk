@@ -1,81 +1,70 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { generateQueueNumber } from '../utils/generateQueueNumber';
+import React, { createContext, useCallback, useContext, useState } from 'react';
+import { toast } from 'react-toastify';
+import { api } from '../api';
+import { usePolling } from '../hooks/usePolling';
+import { useAuth } from './AuthContext';
 
 const QueueContext = createContext();
-const STORAGE_KEY = 'jasrain_print_queue';
 
-function load() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if (saved && Array.isArray(saved.queue)) return saved;
-  } catch (e) {
-    /* ignore corrupted storage */
-  }
-  return { queue: [], counter: 0 };
-}
-
+// Staff and admin get every print job. The kiosk only gets the waiting and printing
+// ones (queue number and status), which is enough for the "now serving" strip.
 export function QueueProvider({ children }) {
-  const [queue, setQueue] = useState(() => load().queue);
-  // A ref keeps numbers unique even if two jobs are added in the same tick
-  const counterRef = useRef(load().counter);
+  const { isAuthenticated } = useAuth();
+  const [queue, setQueue] = useState([]);
 
-  // Save to localStorage so a refresh doesn't wipe the queue
-  useEffect(() => {
+  const refreshQueue = useCallback(async () => {
     try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ queue, counter: counterRef.current })
-      );
+      setQueue(await api.get(isAuthenticated ? '/print-jobs' : '/print-jobs/board'));
     } catch (e) {
-      /* storage full or blocked */
+      /* keep the old list */
     }
-  }, [queue]);
+  }, [isAuthenticated]);
 
-  // Keep the kiosk tab and the staff tab in sync (same computer)
-  useEffect(() => {
-    const onStorage = (e) => {
-      if (e.key !== STORAGE_KEY) return;
-      const fresh = load();
-      counterRef.current = Math.max(counterRef.current, fresh.counter);
-      setQueue(fresh.queue);
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
+  usePolling(refreshQueue, 4000, String(isAuthenticated));
 
   // Derived, so it can never get out of sync with the queue
-  const currentQueue =
-    queue.find((item) => item.status === 'Printing')?.queueNumber ?? null;
+  const currentQueue = queue.find((item) => item.status === 'Printing')?.queueNumber ?? null;
 
-  const addQueue = (printRequest) => {
-    counterRef.current += 1;
-    const newQueue = {
-      id: Date.now() + counterRef.current,
-      queueNumber: generateQueueNumber(counterRef.current),
-      ...printRequest,
-      status: 'Waiting',
-      createdAt: new Date().toISOString(),
-    };
-    setQueue((list) => [...list, newQueue]);
-    return newQueue;
+  // The server makes the queue number and works out the price.
+  // Throws if the job could not be saved.
+  const addQueue = async (printRequest) => {
+    const job = await api.post('/print-jobs', {
+      fileName: printRequest.fileName,
+      fileSize: printRequest.fileSize,
+      fileType: printRequest.fileType,
+      pages: printRequest.pages,
+      copies: printRequest.copies,
+      color: printRequest.color,
+      paperSize: printRequest.paperSize,
+      payment: printRequest.payment,
+      cashReceived: printRequest.cashReceived,
+    });
+    refreshQueue();
+    return job;
   };
 
-  const setStatus = (queueNumber, status) =>
-    setQueue((list) =>
-      list.map((item) =>
-        item.queueNumber === queueNumber
-          ? {
-              ...item,
-              status,
-              ...(status === 'Completed' ? { completedAt: new Date().toISOString() } : {}),
-            }
-          : item
-      )
-    );
+  // runs a staff action, shows any error, then reloads the list
+  const act = async (request) => {
+    try {
+      await request();
+    } catch (e) {
+      toast.error(e.message);
+    }
+    refreshQueue();
+  };
+
+  const idOf = (queueNumber) => queue.find((item) => item.queueNumber === queueNumber)?.id;
+
+  const setStatus = (queueNumber, status) => {
+    const id = idOf(queueNumber);
+    if (id) act(() => api.patch(`/print-jobs/${id}/status`, { status }));
+  };
 
   // Staff handed the customer their change
-  const giveChange = (queueNumber) =>
-    setQueue((list) => list.map((item) => (item.queueNumber === queueNumber ? { ...item, changeGiven: true } : item)));
+  const giveChange = (queueNumber) => {
+    const id = idOf(queueNumber);
+    if (id) act(() => api.post(`/print-jobs/${id}/give-change`));
+  };
 
   // Call the next waiting customer
   const nextQueue = () => {
@@ -86,14 +75,17 @@ export function QueueProvider({ children }) {
   const startQueue = (queueNumber) => setStatus(queueNumber, 'Printing');
   const completeQueue = (queueNumber) => setStatus(queueNumber, 'Completed');
 
-  const removeQueue = (queueNumber) =>
-    setQueue((list) => list.filter((item) => item.queueNumber !== queueNumber));
+  const removeQueue = (queueNumber) => {
+    const id = idOf(queueNumber);
+    if (id) act(() => api.del(`/print-jobs/${id}`));
+  };
 
   return (
     <QueueContext.Provider
       value={{
         queue,
         currentQueue,
+        refreshQueue,
         addQueue,
         nextQueue,
         startQueue,

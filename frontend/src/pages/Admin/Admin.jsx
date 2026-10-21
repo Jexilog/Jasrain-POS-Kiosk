@@ -40,10 +40,11 @@ function Login({ theme }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    if (!login(username.trim(), password)) {
-      setError('Wrong username or password.');
+    const result = await login(username.trim(), password);
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
     setError('');

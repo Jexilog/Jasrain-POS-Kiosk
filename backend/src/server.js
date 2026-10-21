@@ -2,25 +2,31 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { pool } from './db.js';
+import { attachUser } from './auth.js';
+import auth from './routes/auth.js';
 import products from './routes/products.js';
 import stock from './routes/stock.js';
 import orders from './routes/orders.js';
 import printJobs from './routes/printJobs.js';
 import settings from './routes/settings.js';
+import data from './routes/data.js';
 
 const app = express();
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
+app.use(attachUser);
 
 app.get('/api/health', (req, res, next) => {
   pool.query('SELECT 1').then(() => res.json({ ok: true })).catch(next);
 });
 
+app.use('/api/auth', auth);
 app.use('/api/products', products);
 app.use('/api/stock', stock);
 app.use('/api/orders', orders);
 app.use('/api/print-jobs', printJobs);
 app.use('/api/settings', settings);
+app.use('/api/data', data);
 
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 app.use((err, req, res, next) => {

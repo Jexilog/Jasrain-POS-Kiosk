@@ -1,20 +1,6 @@
 // Sample sales for the dashboard.
 // Demo records have demo: true so they can be removed without touching real data.
-import { products as seedProducts } from './products';
-
-const ORDERS_KEY = 'jasrain_orders';
-const QUEUE_KEY = 'jasrain_print_queue';
-const PRODUCTS_KEY = 'jasrain_products';
-const SETTINGS_KEY = 'jasrain_settings';
-
-function readJSON(key, fallback) {
-  try {
-    const v = JSON.parse(localStorage.getItem(key));
-    return v == null ? fallback : v;
-  } catch (e) {
-    return fallback;
-  }
-}
+import { api } from '../api';
 
 // seeded random so the demo data is the same every time
 function mulberry32(seed) {
@@ -122,32 +108,12 @@ export function generateDemo(products, rates, now = new Date(), days = 30, seed 
   return { orders, jobs };
 }
 
-export function hasDemoData() {
-  const o = readJSON(ORDERS_KEY, { orders: [] });
-  const q = readJSON(QUEUE_KEY, { queue: [] });
-  return (o.orders || []).some((x) => x.demo) || (q.queue || []).some((x) => x.demo);
-}
-
-export function applyDemoData() {
-  const products = readJSON(PRODUCTS_KEY, null) || seedProducts;
-  const settings = readJSON(SETTINGS_KEY, {});
-  const rates = (settings && settings.printRates) || { bw: 3, color: 10 };
+// Sends the sample records to the backend. They are marked as demo there.
+export async function applyDemoData(products, rates) {
   const { orders, jobs } = generateDemo(products, rates);
-
-  const o = readJSON(ORDERS_KEY, { orders: [], counter: 0 });
-  const q = readJSON(QUEUE_KEY, { queue: [], counter: 0 });
-  const realOrders = (o.orders || []).filter((x) => !x.demo);
-  const realJobs = (q.queue || []).filter((x) => !x.demo);
-
-  localStorage.setItem(ORDERS_KEY, JSON.stringify({ ...o, orders: [...orders, ...realOrders] }));
-  localStorage.setItem(QUEUE_KEY, JSON.stringify({ ...q, queue: [...jobs, ...realJobs] }));
-  window.location.reload();
+  await api.post('/data/demo', { orders, jobs });
 }
 
-export function clearDemoData() {
-  const o = readJSON(ORDERS_KEY, { orders: [], counter: 0 });
-  const q = readJSON(QUEUE_KEY, { queue: [], counter: 0 });
-  localStorage.setItem(ORDERS_KEY, JSON.stringify({ ...o, orders: (o.orders || []).filter((x) => !x.demo) }));
-  localStorage.setItem(QUEUE_KEY, JSON.stringify({ ...q, queue: (q.queue || []).filter((x) => !x.demo) }));
-  window.location.reload();
+export async function clearDemoData() {
+  await api.del('/data/demo');
 }

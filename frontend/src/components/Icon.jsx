@@ -86,7 +86,7 @@ export default function Icon({ name, size = 20, className = '', ...rest }) {
   );
 }
 
-// icon for a product based on its category (most have no photo)
+// temporary icon for a product based on its category 
 export function categoryIconName(category = '') {
   const c = String(category).toLowerCase();
   if (/drink|beverage|coffee|water|juice|soda/.test(c)) return 'drink';

@@ -33,9 +33,9 @@ function ProductForm({ product, categories, barcodes, defaultCritical, onSubmit,
   const cost = Number(f.cost);
   const margin = marginOf(price, cost);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    const result = onSubmit({
+    const result = await onSubmit({
       name: f.name,
       barcode: f.barcode,
       category: f.category,
@@ -169,8 +169,8 @@ export default function Products() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [products, view, query, category]);
 
-  const handleSubmit = (data) => {
-    const result = form.product ? updateProduct(form.product.barcode, data) : addProduct(data);
+  const handleSubmit = async (data) => {
+    const result = await (form.product ? updateProduct(form.product.barcode, data) : addProduct(data));
     if (result.ok) {
       toast.success(form.product ? 'Product saved.' : 'Product added.');
       setForm(null);
@@ -178,14 +178,16 @@ export default function Products() {
     return result;
   };
 
-  const toggleArchive = (p) => {
-    setActive(p.barcode, !p.active);
+  const toggleArchive = async (p) => {
+    const result = await setActive(p.barcode, !p.active);
+    if (!result.ok) return toast.error(result.error);
     toast.info(p.active ? `${p.name} is hidden from the kiosk.` : `${p.name} is back on the kiosk.`);
   };
 
-  const confirmDelete = () => {
-    deleteProduct(deleting.barcode);
-    toast.success(`${deleting.name} deleted.`);
+  const confirmDelete = async () => {
+    const result = await deleteProduct(deleting.barcode);
+    if (result.ok) toast.success(`${deleting.name} deleted.`);
+    else toast.error(result.error);
     setDeleting(null);
   };
 
@@ -209,7 +211,7 @@ export default function Products() {
       toast.error('That file has no product rows. Download the template to see the format.');
       return;
     }
-    setImportResult(importProducts(rows2));
+    setImportResult(await importProducts(rows2));
   };
 
   return (

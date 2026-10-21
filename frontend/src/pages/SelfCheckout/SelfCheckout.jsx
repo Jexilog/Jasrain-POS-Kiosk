@@ -81,23 +81,22 @@ export default function SelfCheckout() {
   };
 
   // Cash is in: save the paid order, empty the cart, and show the receipt
-  const placeOrder = (cash) => {
+  const placeOrder = async (cash) => {
     if (placingRef.current) return;
     placingRef.current = true;
-    const order = createOrder({
-      items: cart.map((i) => ({
-        barcode: i.barcode,
-        name: i.name,
-        price: i.price,
-        quantity: i.quantity,
-      })),
-      total,
-      payment: 'Cash',
-      cash,
-    });
-    clearCart();
-    setPayOpen(false);
-    setReceipt(order);
+    try {
+      const order = await createOrder({
+        items: cart.map((i) => ({ barcode: i.barcode, quantity: i.quantity })),
+        payment: 'Cash',
+        cash,
+      });
+      clearCart();
+      setPayOpen(false);
+      setReceipt(order);
+    } catch (err) {
+      placingRef.current = false;
+      toast.error(`${err.message} Please call staff.`);
+    }
   };
 
   const finishReceipt = () => {

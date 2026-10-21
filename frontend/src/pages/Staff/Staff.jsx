@@ -78,10 +78,11 @@ export default function Staff() {
   const printing = queue.find((j) => j.status === 'Printing');
   const shown = tab === 'active' ? active : done;
  
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (!login(username.trim(), password)) {
-      toast.error('Wrong username or password');
+    const result = await login(username.trim(), password);
+    if (!result.ok) {
+      toast.error(result.error);
       return;
     }
     setUsername('');
@@ -92,7 +93,7 @@ export default function Staff() {
     try {
       const rec = await getFile(job.id);
       if (!rec) {
-        toast.error('File not found. It may have been cleared, or it was sent from another computer.');
+        toast.error('File not found. It may have been cleared.');
         return null;
       }
       return rec.blob;
