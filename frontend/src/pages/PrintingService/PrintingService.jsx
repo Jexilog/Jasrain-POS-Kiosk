@@ -36,8 +36,6 @@ const fileIconName = (name) => {
   return ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(e) ? 'file' : 'image';
 };
  
-<<<<<<< HEAD
-=======
 const fileEmoji = (name) => {
   const e = extOf(name);
 
@@ -50,7 +48,6 @@ const fileEmoji = (name) => {
   return '📄';
 };
 
->>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
 // Tries to count PDF pages. Returns null when it can't tell.
 async function detectPages(file) {
   const e = extOf(file.name);
@@ -171,23 +168,6 @@ export default function Printing() {
     setSaving(true);
  
     const ahead = queue.filter((q) => q.status === 'Waiting' || q.status === 'Printing').length;
-<<<<<<< HEAD
-    const job = addQueue({
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: file.type,
-      hasFile: true,
-      pages,
-      copies,
-      color,
-      paperSize: paper,
-      total,
-      payment: 'Cash',
-      cashReceived: cash.received,
-      change: cash.change,
-      changeGiven: cash.change === 0,
-    });
-=======
     let job;
     try {
       job = await addQueue({
@@ -206,7 +186,6 @@ export default function Printing() {
       toast.error(`${err.message} Please call staff.`);
       return;
     }
->>>>>>> f10357b (Re: First Sprint: Refinement and Connection of Backend and Frontend)
  
     try {
       // Store the actual file so staff can open it from the staff screen
