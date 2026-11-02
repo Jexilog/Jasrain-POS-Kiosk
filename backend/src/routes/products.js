@@ -1,6 +1,6 @@
 import { Router } from '../asyncRouter.js';
 import { pool, transaction, httpError } from '../db.js';
-import { requireAuth } from '../auth.js';
+import { requireAdmin, requireAdminOrStaff, requireAuth} from '../auth.js';
 import { applyMovements } from '../stock.js';
 
 const router = Router();
@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
   res.json(rows.map((r) => toProduct(r, signedIn)));
 });
 
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAdminOrStaff, async (req, res) => {
   const p = req.body;
   if (!p.name) throw httpError(400, 'Please enter a product name.');
   if (!p.barcode) throw httpError(400, 'Please enter a barcode (or tap Generate).');
@@ -51,7 +51,7 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // stock and barcode are not changed here (use /api/stock/adjust for stock)
-router.put('/:barcode', requireAuth, async (req, res) => {
+router.put('/:barcode', requireAdminOrStaff, async (req, res) => {
   const p = req.body;
   if (!p.name) throw httpError(400, 'Please enter a product name.');
   if (!(Number(p.price) > 0)) throw httpError(400, 'Price must be more than 0.');
@@ -64,12 +64,12 @@ router.put('/:barcode', requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
-router.patch('/:barcode/active', requireAuth, async (req, res) => {
+router.patch('/:barcode/active', requireAdminOrStaff, async (req, res) => {
   await pool.query('UPDATE product SET active = ? WHERE barcode = ?', [Boolean(req.body.active), req.params.barcode]);
   res.json({ ok: true });
 });
 
-router.delete('/:barcode', requireAuth, async (req, res) => {
+router.delete('/:barcode', requireAdminOrStaff, async (req, res) => {
   const [sold] = await pool.query('SELECT 1 FROM order_item WHERE barcode = ? LIMIT 1', [req.params.barcode]);
   if (sold.length) throw httpError(409, 'This product has sales. Hide it instead of deleting it.');
   await transaction(async (conn) => {
@@ -80,7 +80,7 @@ router.delete('/:barcode', requireAuth, async (req, res) => {
 });
 
 // body: { rows: [{ barcode, name, price, cost, category, critical, stock }] } (from a CSV file)
-router.post('/import', requireAuth, async (req, res) => {
+router.post('/import', requireAdminOrStaff, async (req, res) => {
   const rows = Array.isArray(req.body.rows) ? req.body.rows : [];
   const summary = { added: 0, updated: 0, errors: [] };
 

@@ -14,13 +14,13 @@ function loadUser() {
 }
 
 export function AuthProvider({ children }) {
-  const [admin, setAdmin] = useState(loadUser);
+  const [user, setUser] = useState(loadUser);
 
   // the server said our login is no longer valid
   useEffect(() => {
     const onSignedOut = () => {
       sessionStorage.removeItem(USER_KEY);
-      setAdmin(null);
+      setUser(null);
     };
     window.addEventListener('jasrain-signed-out', onSignedOut);
     return () => window.removeEventListener('jasrain-signed-out', onSignedOut);
@@ -29,12 +29,12 @@ export function AuthProvider({ children }) {
   // returns { ok } or { ok: false, error }
   const login = async (username, password) => {
     try {
-      const { token, user } = await api.post('/auth/login', { username, password });
-      const person = { username: user.username, role: user.role };
+      const { token, user: loggedInUser } = await api.post('/auth/login', { username, password });
+      const person = { username: loggedInUser.username, role: loggedInUser.role };
       setToken(token);
       sessionStorage.setItem(USER_KEY, JSON.stringify(person));
-      setAdmin(person);
-      return { ok: true };
+      setUser(person);
+      return { ok: true, user: person };
     } catch (e) {
       return { ok: false, error: e.message };
     }
@@ -43,11 +43,16 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setToken(null);
     sessionStorage.removeItem(USER_KEY);
-    setAdmin(null);
+    setUser(null);
   };
 
+  const isAuthenticated = Boolean(user && getToken());
+
+  const isAdmin = isAuthenticated && user.role === 'Administrator';
+  const isStaff = isAuthenticated && user.role === 'Staff';
+
   return (
-    <AuthContext.Provider value={{ admin, login, logout, isAuthenticated: Boolean(admin) }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, isAdmin, isStaff}}>
       {children}
     </AuthContext.Provider>
   );

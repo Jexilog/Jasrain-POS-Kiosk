@@ -122,7 +122,7 @@ export default function Alerts() {
           {alerts.items.length === 0 ? (
             <EmptyState icon="check-circle" title="All clear" hint="Every item is above its critical level and nothing is waiting too long." />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {alerts.items.map((a) => <AlertRow key={a.id} a={a} />)}
             </div>
           )}
@@ -134,7 +134,7 @@ export default function Alerts() {
             <li><b>A pop-up</b> appears when you sign in, and again the moment an item newly runs low or out while this page is open.</li>
             <li>
               <b>Desktop notifications</b> can show even when this tab is in the background.
-              <div style={{ marginTop: 8 }}>
+              <div style={{ marginTop: '0.5rem' }}>
                 {notifyOn ? (
                   <div className="admRow" style={{ alignItems: 'center' }}>
                     <Badge tone="good">On</Badge>

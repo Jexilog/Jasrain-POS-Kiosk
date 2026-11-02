@@ -2,7 +2,8 @@
 // The kiosk uploads the file, staff download it from the staff screen.
 import { api } from '../api';
 
-export const saveFile = (id, file) => api.put(`/print-jobs/${id}/file`, file);
+// `token` is the one-time upload key the server gave when the job was created
+export const saveFile = (id, file, token) => api.put(`/print-jobs/${id}/file`, file, { 'x-upload-token': token });
 
 // returns { blob } or undefined when the job has no file
 export async function getFile(id) {

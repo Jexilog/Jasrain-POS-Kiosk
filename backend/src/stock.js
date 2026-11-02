@@ -27,12 +27,21 @@ export async function applyMovements(conn, changes, by = 'Admin', orderNumber = 
   return entries;
 }
 
-// next number like A001 or P001
+// next number like A001 or P001.
+// The numbers come from the counter table, so a number is never used twice, even if an order
+// is deleted. The UPDATE locks the counter row, so two customers at once cannot get the same number.
 export async function nextNumber(conn, table, column, prefix) {
-  const [rows] = await conn.query(
-    `SELECT COALESCE(MAX(CAST(SUBSTRING(${column}, 2) AS UNSIGNED)), 0) + 1 AS n
-     FROM ${table} WHERE ${column} LIKE ? FOR UPDATE`,
-    [`${prefix}%`]
-  );
+  // first time only: start from the highest number already in the table
+  const [have] = await conn.query('SELECT 1 FROM counter WHERE name = ?', [table]);
+  if (!have.length) {
+    await conn.query(
+      `INSERT INTO counter (name, value)
+       SELECT ?, COALESCE(MAX(CAST(SUBSTRING(${column}, 2) AS UNSIGNED)), 0) FROM ${table} WHERE ${column} LIKE ?
+       ON DUPLICATE KEY UPDATE value = value`,
+      [table, `${prefix}%`]
+    );
+  }
+  await conn.query('UPDATE counter SET value = LAST_INSERT_ID(value + 1) WHERE name = ?', [table]);
+  const [rows] = await conn.query('SELECT LAST_INSERT_ID() AS n');
   return prefix + String(rows[0].n).padStart(3, '0');
 }

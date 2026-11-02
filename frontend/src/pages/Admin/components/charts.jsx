@@ -192,7 +192,7 @@ export function BarChart({
           </svg>
 
           {hover != null && data[hover] && (
-            <div className="admTip" style={{ left: tipLeft, top: 4 }} role="status">
+            <div className="admTip" style={{ left: tipLeft, top: '0.25rem' }} role="status">
               <div className="admTipTitle">{data[hover].title}</div>
               {series.map((s) => (
                 <div className="admTipRow" key={s.key}>

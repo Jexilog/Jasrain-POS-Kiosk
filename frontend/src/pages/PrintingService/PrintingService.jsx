@@ -64,14 +64,14 @@ async function detectPages(file) {
 }
  
 const UploadIcon = () => (
-  <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg style={{ width: '2.875rem', height: '2.875rem' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M12 16V4M7 9l5-5 5 5" />
     <path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" />
   </svg>
 );
  
 const CheckIcon = () => (
-  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg style={{ width: '2.125rem', height: '2.125rem' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M5 12l5 5 9-10" />
   </svg>
 );
@@ -189,7 +189,7 @@ export default function Printing() {
  
     try {
       // Store the actual file so staff can open it from the staff screen
-      await saveFile(job.id, file);
+      await saveFile(job.id, file, job.uploadToken);
       setTicket({ ...job, ahead });
     } catch (err) {
       // the customer has already paid, so keep the job and send them to staff

@@ -166,7 +166,7 @@ export default function Movers() {
                       <div className="admListMain"><ProdCell p={s} sub={s.units ? `${int(s.units)} sold` : 'No sales'} /></div>
                       <div style={{ textAlign: 'right' }}>
                         <b>{int(s.stock)} in stock</b>
-                        <div className="admMuted" style={{ fontSize: 13 }}>{peso(s.stock * s.cost, 0)} at cost</div>
+                        <div className="admMuted" style={{ fontSize: '0.8125rem' }}>{peso(s.stock * s.cost, 0)} at cost</div>
                       </div>
                       <Badge tone={TONE[s.move]} icon={ICON[s.move]}>{s.move}</Badge>
                     </li>
@@ -181,7 +181,7 @@ export default function Movers() {
           </Card>
 
           <Card title="All products" subtitle="Sorted your way">
-            <div className="admToolbar" style={{ marginBottom: 12 }}>
+            <div className="admToolbar" style={{ marginBottom: '0.75rem' }}>
               <Segmented
                 label="Movement"
                 value={filter}

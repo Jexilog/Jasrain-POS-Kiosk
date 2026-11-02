@@ -15,6 +15,7 @@ import Staff from './pages/Staff/Staff';
 import Admin from './pages/Admin/Admin';
 import ErrorBoundary from './components/ErrorBoundary';
 import NotFound from './components/NotFound';
+import BasketCheck from './pages/BasketCheck/BasketCheck';
 
 export default function App() {
   return (
@@ -31,8 +32,9 @@ export default function App() {
                         <Route path="/" element={<KioskMenu />} />
                         <Route path="/checkout" element={<SelfCheckout />} />
                         <Route path="/printing" element={<Printing />} />
-                        <Route path="/staff" element={<Staff />} />
                         <Route path="/admin/*" element={<Admin />} />
+                        <Route path="/staff" element={<Staff />} />
+                        <Route path="/basket-check" element={<BasketCheck />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </BrowserRouter>

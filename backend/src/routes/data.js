@@ -1,9 +1,9 @@
 import { Router } from '../asyncRouter.js';
 import { pool, transaction, httpError } from '../db.js';
-import { requireAuth } from '../auth.js';
+import { requireAdminOrStaff } from '../auth.js';
 
 const router = Router();
-router.use(requireAuth);
+router.use(requireAdminOrStaff);
 
 // body: { orders: [...], jobs: [...] } made by the frontend (utils/demoData.js)
 router.post('/demo', async (req, res) => {
@@ -69,6 +69,7 @@ router.post('/reset', async (req, res) => {
     for (const t of ['print_file', 'print_job', 'stock_movement', 'order_item', 'store_order', 'product']) {
       await conn.query(`DELETE FROM ${t}`);
     }
+    await conn.query('DELETE FROM counter');
     await conn.query(
       "UPDATE settings SET store_name = 'JASRAIN', bw_rate = 3, color_rate = 10, default_critical = 5 WHERE id = 1"
     );

@@ -9,7 +9,8 @@ import {
 } from 'react-icons/fi';
 
 // Feather has no peso icon, so just use the sign
-const Peso = ({ size }) => <span style={{ fontSize: size, lineHeight: 1, fontWeight: 700 }}>₱</span>;
+const toRem = (n) => (typeof n === 'number' ? `${n / 16}rem` : n);
+const Peso = ({ size }) => <span style={{ fontSize: toRem(size), lineHeight: 1, fontWeight: 700 }}>₱</span>;
 
 // usage: <Icon name="printer" size={18} />
 const icons = {
@@ -76,7 +77,7 @@ export default function Icon({ name, size = 20, className = '', ...rest }) {
   const Component = icons[name] || FiBox;
   return (
     <Component
-      size={size}
+      size={toRem(size)}
       className={`ico ${className}`}
       strokeWidth={2.25}
       aria-hidden="true"

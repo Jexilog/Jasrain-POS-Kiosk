@@ -1,6 +1,6 @@
 import { Router } from '../asyncRouter.js';
 import { pool, httpError } from '../db.js';
-import { requireAuth } from '../auth.js';
+import { requireAdminOrStaff } from '../auth.js';
 
 const router = Router();
 
@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 });
 
 // body: { storeName?, printRates?: { bw, color }, defaultCritical? } (only what changed)
-router.put('/', requireAuth, async (req, res) => {
+router.put('/', requireAdminOrStaff, async (req, res) => {
   const [[cur]] = await pool.query('SELECT * FROM settings WHERE id = 1');
   const { storeName, printRates, defaultCritical } = req.body;
 

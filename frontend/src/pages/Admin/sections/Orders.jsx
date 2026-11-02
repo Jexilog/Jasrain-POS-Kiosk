@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useOrders } from '../../../context/OrderContext';
 import { useQueueContext } from '../../../context/QueueContext';
@@ -29,7 +28,7 @@ function inDate(iso, key) {
 export default function Orders() {
   const { orders, markPaid, cancelOrder } = useOrders();
   const { queue } = useQueueContext();
-  const [tab, setTab] = useState('orders');
+  const [tab, setTab] = useState(() => (new URLSearchParams(window.location.search).get('tab') === 'print' ? 'print' : 'orders'));
   const [q, setQ] = useState('');
   const [status, setStatus] = useState('all');
   const [date, setDate] = useState('all');
@@ -91,7 +90,7 @@ export default function Orders() {
       />
 
       <Card>
-        <div className="admToolbar" style={{ marginBottom: 12 }}>
+        <div className="admToolbar" style={{ marginBottom: '0.75rem' }}>
           <input type="search" placeholder={tab === 'orders' ? 'Search order number or item' : 'Search queue number or file'} value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search" />
           <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Status">
             <option value="all">All statuses</option>
@@ -183,7 +182,6 @@ export default function Orders() {
           onClose={() => setOpen(null)}
           footer={
             <>
-              <Link className="admBtn primary" to="/staff">Open staff screen</Link>
               <button className="admBtn" onClick={() => setOpen(null)}>Close</button>
             </>
           }

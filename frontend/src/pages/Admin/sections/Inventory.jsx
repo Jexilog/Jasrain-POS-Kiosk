@@ -1,8 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useProducts } from '../../../context/ProductContext';
+import { useSettings } from '../../../context/SettingsContext';
 import { useReport } from '../../../hooks/useReport';
+import { useBarcodeScanner } from '../../../hooks/useBarcodeScanner';
 import { stockStatus, STOCK } from '../../../utils/analytics';
 import { toCSV, downloadText } from '../../../utils/csv';
 import { peso, int, dateTime } from '../../../utils/format';
@@ -66,7 +68,7 @@ function AdjustModal({ product, onClose, onSave }) {
         </>
       }
     >
-      <form id="adjustForm" onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <form id="adjustForm" onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
         <ProdCell p={product} sub={`${product.barcode} · ${int(product.stock)} in stock now`} />
 
         <Segmented label="Type of change" value={mode} onChange={changeMode} options={MODES} />
@@ -99,8 +101,165 @@ function AdjustModal({ product, onClose, onSave }) {
 }
 
 // page
+// quick stock-in: scan item after item and add how many came in
+function QuickStockModal({ products, categories, defaultCritical, onClose, onSave, onCreate }) {
+  const [code, setCode] = useState('');
+  const [item, setItem] = useState(null);
+  const [qty, setQty] = useState('1');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [added, setAdded] = useState([]);
+  const [newCode, setNewCode] = useState(null); // scanned barcode that is not a product yet
+  const [nf, setNf] = useState({ name: '', category: '', price: '', cost: '', stock: '1', critical: String(defaultCritical ?? 5) });
+  const nameRef = useRef(null);
+  const codeRef = useRef(null);
+  const qtyRef = useRef(null);
+
+  const lookup = useCallback((raw) => {
+    const c = String(raw || '').trim();
+    setCode('');
+    if (!c) return;
+    const found = products.find((p) => p.barcode === c);
+    if (!found) {
+      setItem(null);
+      setError('');
+      setNf((cur) => ({ ...cur, name: '', price: '', cost: '', stock: '1' })); // clear digits the scanner typed
+      setNewCode(c);
+      return;
+    }
+    setNewCode(null);
+    setError(found.active ? '' : `${found.name} is archived. Restore it in Products to sell it again.`);
+    setItem(found);
+    setQty('1');
+  }, [products]);
+  useBarcodeScanner(lookup);
+
+  // after a scan, jump to the quantity box; after saving, go back to waiting for the next scan
+  useEffect(() => {
+    if (item) { qtyRef.current?.focus(); qtyRef.current?.select(); }
+    else if (newCode) nameRef.current?.focus();
+    else codeRef.current?.focus();
+  }, [item, newCode]);
+
+  const n = Math.floor(Number(qty));
+  const valid = item && qty !== '' && Number.isFinite(n) && n >= 1;
+
+  const setN = (k) => (e) => setNf((cur) => ({ ...cur, [k]: e.target.value }));
+  const createNew = async (e) => {
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    const result = await onCreate({ barcode: newCode, ...nf });
+    setBusy(false);
+    if (!result.ok) { setError(result.error || 'Could not add the product.'); return; }
+    setAdded((list) => [{ barcode: newCode, name: nf.name.trim(), n: Number(nf.stock) || 0, after: Number(nf.stock) || 0, isNew: true }, ...list]);
+    setNewCode(null);
+    setError('');
+  };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!valid || busy) return;
+    setBusy(true);
+    const done = await onSave({ barcode: item.barcode, delta: n, reason: REASONS.add[0], note: 'Quick stock-in' });
+    setBusy(false);
+    if (done) {
+      setAdded((list) => [{ barcode: item.barcode, name: item.name, n, after: done.stockAfter }, ...list]);
+      setItem(null);
+      setError('');
+    }
+  };
+
+  return (
+    <Modal
+      title="Quick stock-in"
+      size="lg"
+      onClose={onClose}
+      footer={<button className="admBtn primary" type="button" onClick={onClose}>Done</button>}
+    >
+      <div className="admCallout">Scan each item that arrived with the barcode scanner, enter how many, and press Enter. New items can be added right here. Then scan the next one.</div>
+
+      {!item && !newCode && (
+        <Field label="Barcode" hint="Scan now, or type the barcode and press Enter." error={error}>
+          <input
+            ref={codeRef}
+            value={code}
+            inputMode="numeric"
+            placeholder="Waiting for a scan…"
+            onChange={(e) => setCode(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); lookup(code); } }}
+            autoFocus
+          />
+        </Field>
+      )}
+
+      {newCode && (
+        <form onSubmit={createNew} className="admFormGrid">
+          <div className="full admCallout">
+            Barcode <strong>{newCode}</strong> is not in your products yet. Fill in the details to add it as a new product.
+          </div>
+          <div className="full">
+            <Field label="Name">
+              <input ref={nameRef} value={nf.name} onChange={setN('name')} placeholder="e.g. Coke Zero 330ml" />
+            </Field>
+          </div>
+          <Field label="Category" hint="Pick one or type a new one.">
+            <input value={nf.category} onChange={setN('category')} list="quickCatList" placeholder="e.g. Drinks" />
+            <datalist id="quickCatList">{categories.map((c) => <option key={c} value={c} />)}</datalist>
+          </Field>
+          <Field label="Starting stock" hint="How many came in.">
+            <input type="number" min="0" step="1" value={nf.stock} onChange={setN('stock')} />
+          </Field>
+          <Field label="Selling price (₱)">
+            <input type="number" min="0" step="0.01" value={nf.price} onChange={setN('price')} />
+          </Field>
+          <Field label="Cost price (₱)" hint="What you pay your supplier.">
+            <input type="number" min="0" step="0.01" value={nf.cost} onChange={setN('cost')} />
+          </Field>
+          {error && <div className="full admFormError" role="alert">{error}</div>}
+          <div className="full admRow">
+            <button className="admBtn primary" type="submit" disabled={busy || !nf.name.trim()}>Add new product</button>
+            <button className="admBtn" type="button" onClick={() => { setNewCode(null); setError(''); }}>Cancel</button>
+          </div>
+        </form>
+      )}
+
+      {item && (
+        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+          <ProdCell p={item} sub={`${item.barcode} · ${int(item.stock)} in stock now`} />
+          {error && <p className="admFieldError">{error}</p>}
+          <div className="admRow">
+            <Field label="How many came in?">
+              <input ref={qtyRef} type="number" inputMode="numeric" min="1" step="1" value={qty} onChange={(e) => setQty(e.target.value)} />
+            </Field>
+            <button className="admBtn primary" type="submit" disabled={!valid || busy}>Add to stock</button>
+            <button className="admBtn" type="button" onClick={() => { setItem(null); setError(''); }}>Cancel</button>
+          </div>
+          {valid && <div className="admCallout">Stock after saving: <strong>{int(item.stock + n)}</strong></div>}
+        </form>
+      )}
+
+      {added.length > 0 && (
+        <div>
+          <div className="admFieldLabel">Added in this session</div>
+          <ul className="admList">
+            {added.map((a, i) => (
+              <li key={`${a.barcode}-${i}`} className="admListItem">
+                <div className="admListMain"><strong>{a.name}</strong><span>{a.barcode}</span></div>
+                <Badge tone={a.isNew ? 'info' : 'good'}>{a.isNew ? 'New · ' : ''}+{int(a.n)}</Badge>
+                <span className="admMuted">now {int(a.after)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </Modal>
+  );
+}
+
 export default function Inventory() {
-  const { products, log, applyMovements } = useProducts();
+  const { products, log, applyMovements, addProduct } = useProducts();
+  const { settings } = useSettings();
   const stats30 = useReport('30d').stats;
   const [params, setParams] = useSearchParams();
 
@@ -113,6 +272,8 @@ export default function Inventory() {
   const [showArchived, setShowArchived] = useState(false);
   const [sort, setSort] = useState('name');
   const [adjusting, setAdjusting] = useState(null);
+
+  const [quickOpen, setQuickOpen] = useState(false);
 
   const [logQuery, setLogQuery] = useState('');
   const [logReason, setLogReason] = useState('All');
@@ -188,6 +349,18 @@ export default function Inventory() {
     }
   };
 
+  // used by Quick stock-in: returns the saved result, or null if it failed
+  const quickSave = async (change) => {
+    try {
+      const done = await applyMovements([change]);
+      if (done.length) return done[0];
+      toast.info('Nothing changed.');
+    } catch (err) {
+      toast.error(err.message);
+    }
+    return null;
+  };
+
   const exportStock = () => {
     downloadText(
       `inventory-${todayStamp()}.csv`,
@@ -225,7 +398,10 @@ export default function Inventory() {
         title="Inventory"
         subtitle="What you have on the shelf, what is running low, and every change to stock."
         actions={
-          <button className="admBtn" onClick={tab === 'stock' ? exportStock : exportLog}><Icon name="download" size={16} /> Export CSV</button>
+          <>
+            <button className="admBtn primary" onClick={() => setQuickOpen(true)}><Icon name="scan" size={16} /> Quick stock-in</button>
+            <button className="admBtn" onClick={tab === 'stock' ? exportStock : exportLog}><Icon name="download" size={16} /> Export CSV</button>
+          </>
         }
       />
 
@@ -248,7 +424,7 @@ export default function Inventory() {
 
       {tab === 'stock' ? (
         <Card>
-          <div className="admToolbar" style={{ marginBottom: 12 }}>
+          <div className="admToolbar" style={{ marginBottom: '0.75rem' }}>
             <input className="grow" placeholder="Search name or barcode" value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search products" />
             <select value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Category">
               {categories.map((c) => <option key={c} value={c}>{c === 'All' ? 'All categories' : c}</option>)}
@@ -265,7 +441,7 @@ export default function Inventory() {
             </label>
           </div>
 
-          <div style={{ marginBottom: 12 }}>
+          <div style={{ marginBottom: '0.75rem' }}>
             <Segmented
               label="Stock filter"
               value={filter}
@@ -334,7 +510,7 @@ export default function Inventory() {
         </Card>
       ) : (
         <Card title="Movement log" subtitle="Every sale, restock, return and correction, newest first.">
-          <div className="admToolbar" style={{ marginBottom: 12 }}>
+          <div className="admToolbar" style={{ marginBottom: '0.75rem' }}>
             <input className="grow" placeholder="Search product or note" value={logQuery} onChange={(e) => setLogQuery(e.target.value)} aria-label="Search the log" />
             <select value={logReason} onChange={(e) => setLogReason(e.target.value)} aria-label="Reason">
               {logReasons.map((r) => <option key={r} value={r}>{r === 'All' ? 'All reasons' : r}</option>)}
@@ -344,7 +520,7 @@ export default function Inventory() {
           {logRows.length === 0 ? (
             <EmptyState icon="list" title="No movements yet" hint="Sales from the kiosk and your stock adjustments will be listed here." />
           ) : (
-            <div className="admTableWrap" style={{ maxHeight: 560, overflowY: 'auto' }}>
+            <div className="admTableWrap" style={{ maxHeight: '35rem', overflowY: 'auto' }}>
               <table className="admTable">
                 <thead>
                   <tr>
@@ -372,7 +548,8 @@ export default function Inventory() {
         </Card>
       )}
 
-      {adjusting && <AdjustModal product={adjusting} onClose={() => setAdjusting(null)} onSave={save} />}
+      {quickOpen && <QuickStockModal products={products} categories={categories.filter((c) => c !== 'All')} defaultCritical={settings.defaultCritical} onClose={() => setQuickOpen(false)} onSave={quickSave} onCreate={addProduct} />}
+      {adjusting && <AdjustModal key={adjusting.barcode} product={adjusting} onClose={() => setAdjusting(null)} onSave={save} />}
     </>
   );
 }

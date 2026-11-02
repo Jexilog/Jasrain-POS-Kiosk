@@ -27,6 +27,7 @@ function ProductForm({ product, categories, barcodes, defaultCritical, onSubmit,
   );
   const [error, setError] = useState('');
   const priceRef = useRef(null);
+  const nameRef = useRef(null);
   const set = (k) => (e) => setF((cur) => ({ ...cur, [k]: e.target.value }));
 
   const price = Number(f.price);
@@ -65,7 +66,7 @@ function ProductForm({ product, categories, barcodes, defaultCritical, onSubmit,
       <form id="productForm" onSubmit={submit} className="admFormGrid">
         <div className="full">
           <Field label="Name">
-            <input value={f.name} onChange={set('name')} autoFocus={editing} placeholder="e.g. Coke Zero 330ml" />
+            <input ref={nameRef} value={f.name} onChange={set('name')} autoFocus={editing} placeholder="e.g. Coke Zero 330ml" />
           </Field>
         </div>
 
@@ -86,7 +87,7 @@ function ProductForm({ product, categories, barcodes, defaultCritical, onSubmit,
                   // a scanner ends with Enter: move on instead of submitting the form
                   if (e.key === 'Enter') {
                     e.preventDefault();
-                    priceRef.current?.focus();
+                    (f.name.trim() ? priceRef : nameRef).current?.focus();
                   }
                 }}
               />
@@ -96,6 +97,9 @@ function ProductForm({ product, categories, barcodes, defaultCritical, onSubmit,
                 </button>
               )}
             </div>
+            {!editing && f.barcode && barcodes.includes(f.barcode.trim()) && (
+              <p className="admFieldError" role="alert">This barcode is already used by another product. Use Inventory to add stock, or scan a different item.</p>
+            )}
           </Field>
         </div>
 
@@ -231,7 +235,7 @@ export default function Products() {
       />
 
       <Card>
-        <div className="admToolbar" style={{ marginBottom: 12 }}>
+        <div className="admToolbar" style={{ marginBottom: '0.75rem' }}>
           <input className="grow" placeholder="Search name or barcode" value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search products" />
           <select value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Category">
             <option value="All">All categories</option>

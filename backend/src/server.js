@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { pool } from './db.js';
-import { attachUser } from './auth.js';
+import { attachUser, requireAdminOrStaff, requireAdmin, requireAuth } from './auth.js';
 import auth from './routes/auth.js';
 import products from './routes/products.js';
 import stock from './routes/stock.js';
@@ -10,6 +10,7 @@ import orders from './routes/orders.js';
 import printJobs from './routes/printJobs.js';
 import settings from './routes/settings.js';
 import data from './routes/data.js';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
@@ -20,13 +21,35 @@ app.get('/api/health', (req, res, next) => {
   pool.query('SELECT 1').then(() => res.json({ ok: true })).catch(next);
 });
 
+app.set('trust proxy', 2);
+
+// const KioskLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   limit: 150, 
+//   standardHeaders: 'draft-8',
+//   legacyHeaders: false
+// });
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10, 
+  standardHeaders: 'draft-8',
+  legacyHeaders: false
+})
+
+app.use('/api/auth/login', loginLimiter);
+
 app.use('/api/auth', auth);
-app.use('/api/products', products);
-app.use('/api/stock', stock);
+
+app.use('/api/stock',requireAdminOrStaff, stock);
 app.use('/api/orders', orders);
 app.use('/api/print-jobs', printJobs);
+
+app.use('/api/products', products);
+
 app.use('/api/settings', settings);
-app.use('/api/data', data);
+
+app.use('/api/data', requireAdmin, data);
 
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 app.use((err, req, res, next) => {

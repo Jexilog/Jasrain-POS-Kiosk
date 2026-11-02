@@ -14,7 +14,7 @@ export default function OrdersPanel() {
   const owed = (o) => o.change > 0 && !o.changeGiven && o.status !== 'Cancelled';
   // first tab: waiting for staff = unpaid orders + paid orders that are still owed change
   const todo = orders.filter((o) => o.status === 'Unpaid' || owed(o)).slice().reverse();
-  const closed = orders.filter((o) => o.status !== 'Unpaid' && !owed(o)).slice().reverse();
+  const closed = orders.filter((o) => o.status !== 'Unpaid' && !owed(o) && !o.archived).slice().reverse();
   const shown = tab === 'todo' ? todo : closed;
   const unpaid = orders.filter((o) => o.status === 'Unpaid').length;
   const changeOwed = orders.filter(owed).reduce((n, o) => n + o.change, 0);

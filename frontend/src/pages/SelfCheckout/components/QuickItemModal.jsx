@@ -15,7 +15,7 @@ const KEY_ROWS = [
 const NUMPAD = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'BACK', '0', 'DONE'];
 
 const SearchIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+  <svg style={{ width: '1.375rem', height: '1.375rem' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
     <circle cx="11" cy="11" r="7" />
     <path d="M20 20l-3.5-3.5" />
   </svg>

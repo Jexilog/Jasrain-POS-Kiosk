@@ -1,6 +1,6 @@
 import { Router } from '../asyncRouter.js';
 import { pool, httpError } from '../db.js';
-import { verifyPassword, signToken, requireAuth } from '../auth.js';
+import { verifyPassword, signToken, requireAdminOrStaff } from '../auth.js';
 
 const router = Router();
 
@@ -30,7 +30,7 @@ router.post('/login', async (req, res) => {
   res.json({ token: signToken(user), user });
 });
 
-router.get('/me', requireAuth, (req, res) => {
+router.get('/me', requireAdminOrStaff, (req, res) => {
   res.json({ username: req.user.username, role: req.user.role });
 });
 

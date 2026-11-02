@@ -7,6 +7,7 @@ import { useOrders } from '../../context/OrderContext';
 import { useQueueContext } from '../../context/QueueContext';
 import { useAlerts } from '../../hooks/useAlerts';
 import { useStockNotifier } from '../../hooks/useStockNotifier';
+import { useSidebar } from '../../hooks/useSidebar';
 import { clearDemoData } from '../../utils/demoData';
 import { Field } from './components/ui';
 
@@ -68,7 +69,6 @@ function Login({ theme }) {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
           </Field>
           <button className="admBtn primary" type="submit" disabled={!username || !password}>Sign in</button>
-          <Link className="admLinkBtn" to="/"><Icon name="arrow-left" size={14} /> Back to kiosk</Link>
         </form>
       </div>
     </div>
@@ -137,7 +137,8 @@ function Bell({ alerts }) {
 
 // the panel
 function Shell({ theme, toggleTheme }) {
-  const { admin, logout } = useAuth();
+  const [collapsed, toggleSide] = useSidebar();
+  const { user, logout } = useAuth();
   const { orders } = useOrders();
   const { queue } = useQueueContext();
   const alerts = useAlerts();
@@ -166,10 +167,10 @@ function Shell({ theme, toggleTheme }) {
 
   return (
     <div className={`adminApp ${theme}Mode`}>
-      <aside className="admSide">
+      <aside className={`admSide${collapsed ? ' collapsed' : ''}`}>
         <div className="admBrand">
           <div className="admBrandMark" aria-hidden="true">J</div>
-          <div>
+          <div className="admBrandText">
             <div className="admBrandName">JASRAIN</div>
             <div className="admBrandSub">Admin panel</div>
           </div>
@@ -182,24 +183,23 @@ function Shell({ theme, toggleTheme }) {
               to={n.to}
               end={n.end}
               className={({ isActive }) => `admNavLink${isActive ? ' active' : ''}`}
+              title={n.label}
             >
               <span className="admNavIcon" aria-hidden="true"><Icon name={n.icon} size={18} /></span>
-              {n.label}
+              <span className="admNavText">{n.label}</span>
               {n.count && counts[n.count] > 0 && <span className="admNavCount">{counts[n.count]}</span>}
             </NavLink>
           ))}
         </nav>
+        <button type="button" className="admNavLink admSideToggle" onClick={toggleSide} title={collapsed ? 'Expand menu' : 'Collapse menu'} aria-label={collapsed ? 'Expand menu' : 'Collapse menu'} aria-expanded={!collapsed}>
+          <span className="admNavIcon" aria-hidden="true"><Icon name={collapsed ? 'arrow-right' : 'arrow-left'} size={18} /></span>
+          <span className="admNavText">Collapse</span>
+        </button>
       </aside>
 
       <div className="admMain">
         <div className="admTopbar">
-          <span className="admWho">Signed in as <b>{admin?.username}</b></span>
-          <a className="admIconBtn" href="/staff" target="_blank" rel="noopener noreferrer" title="Staff screen (new tab)" aria-label="Open staff screen in a new tab">
-            <Icon name="user" size={19} />
-          </a>
-          <a className="admIconBtn" href="/" target="_blank" rel="noopener noreferrer" title="Kiosk (new tab)" aria-label="Open kiosk in a new tab">
-            <Icon name="cart" size={19} />
-          </a>
+          <span className="admWho">Signed in as <b>{user?.username}</b></span>
           <Bell alerts={alerts} />
           <button className="admIconBtn" onClick={toggleTheme} aria-label="Switch light or dark mode">
             <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={19} />
@@ -234,6 +234,31 @@ function Shell({ theme, toggleTheme }) {
 
 export default function Admin() {
   const { theme, toggleTheme } = useKiosk();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  if (isAuthenticated && user?.role !== 'Administrator') {
+    // a staff account signed in here: the server would refuse everything anyway
+
+    if(isAuthenticated && user?.role === 'Staff'){
+      return <Navigate to="/staff" replace />
+    }
+
+    if(isAuthenticated && user?.role !== 'Administrator'){
+      return <Navigate to="/" replace />
+    }
+
+    return (
+      <div className={`adminApp ${theme}Mode`}>
+        <div className="admLoginWrap">
+          <div className="admLogin">
+            <strong>This screen is for the administrator.</strong>
+            <span className="admMuted">You are signed in as staff. Use the staff screen, or sign in as the administrator.</span>
+            <button className="admBtn primary" onClick={logout}>Sign out</button>
+            <Link className="admLinkBtn" to="/staff">Go to the staff screen</Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   return isAuthenticated ? <Shell theme={theme} toggleTheme={toggleTheme} /> : <Login theme={theme} />;
 }

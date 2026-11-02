@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import { useSidebar } from '../../hooks/useSidebar';
 import { toast } from 'react-toastify';
 import { useKiosk } from '../../context/KioskContext';
 import { useAuth } from '../../context/AuthContext';
@@ -34,11 +35,13 @@ const timeAgo = (iso) => {
 };
  
 export default function Staff() {
-  const navigate = useNavigate();
   const { theme, toggleTheme } = useKiosk();
-  const { isAuthenticated, login, logout } = useAuth();
-  const { queue, nextQueue, startQueue, completeQueue, removeQueue, giveChange } = useQueueContext();
+  const { user, isAuthenticated, login, logout } = useAuth();
+  const { queue: allJobs, nextQueue, startQueue, completeQueue, removeQueue, giveChange } = useQueueContext();
+  // removed jobs stay in the database for the reports, but not on this screen
+  const queue = useMemo(() => allJobs.filter((j) => !j.archived), [allJobs]);
  
+  const [collapsed, toggleSide] = useSidebar();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [tab, setTab] = useState('active');
@@ -85,6 +88,13 @@ export default function Staff() {
       toast.error(result.error);
       return;
     }
+
+    if(result.user?.role !== 'Staff'){
+      logout();
+      toast.error("This login page is for staff accounts only!");
+      return;
+    }
+    
     setUsername('');
     setPassword('');
   };
@@ -132,7 +142,14 @@ export default function Staff() {
     removeQueue(job.queueNumber);
     deleteFile(job.id).catch(() => {});
   };
- 
+  
+  if(isAuthenticated && user?.role === "Administrator"){
+    return <Navigate to="/admin" replace/>
+  }
+
+  if(isAuthenticated && user?.role !== "Staff"){
+    return <Navigate to="/" replace/>
+  }
   // Login
   if (!isAuthenticated) {
     return (
@@ -153,9 +170,6 @@ export default function Staff() {
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
             </Field>
             <button className="admBtn primary" type="submit" disabled={!username || !password}>Sign in</button>
-            <button type="button" className="admLinkBtn" onClick={() => navigate('/')}>
-              <Icon name="arrow-left" size={14} /> Back to kiosk
-            </button>
           </form>
         </div>
       </div>
@@ -169,33 +183,34 @@ export default function Staff() {
   // Dashboard
   return (
     <div className={`adminApp ${theme}Mode`}>
-      <aside className="admSide">
+      <aside className={`admSide${collapsed ? ' collapsed' : ''}`}>
         <div className="admBrand">
           <div className="admBrandMark" aria-hidden="true">J</div>
-          <div>
+          <div className="admBrandText">
             <div className="admBrandName">JASRAIN</div>
             <div className="admBrandSub">Staff</div>
           </div>
         </div>
 
         <nav aria-label="Staff sections" style={{ display: 'contents' }}>
-          <button type="button" className={`admNavLink${section === 'print' ? ' active' : ''}`} onClick={() => setSection('print')}>
-            <Icon name="printer" size={18} /> Print queue
+          <button type="button" className={`admNavLink${section === 'print' ? ' active' : ''}`} onClick={() => setSection('print')} title="Print queue">
+            <span className="admNavIcon" aria-hidden="true"><Icon name="printer" size={18} /></span><span className="admNavText">Print queue</span>
             {waiting > 0 && <span className="admNavCount">{waiting}</span>}
           </button>
-          <button type="button" className={`admNavLink${section === 'orders' ? ' active' : ''}`} onClick={() => setSection('orders')}>
-            <Icon name="receipt" size={18} /> Store orders
+          <button type="button" className={`admNavLink${section === 'orders' ? ' active' : ''}`} onClick={() => setSection('orders')} title="Store orders">
+            <span className="admNavIcon" aria-hidden="true"><Icon name="receipt" size={18} /></span><span className="admNavText">Store orders</span>
             {todoCount > 0 && <span className="admNavCount">{todoCount}</span>}
           </button>
         </nav>
+        <button type="button" className="admNavLink admSideToggle" onClick={toggleSide} title={collapsed ? 'Expand menu' : 'Collapse menu'} aria-label={collapsed ? 'Expand menu' : 'Collapse menu'} aria-expanded={!collapsed}>
+          <span className="admNavIcon" aria-hidden="true"><Icon name={collapsed ? 'arrow-right' : 'arrow-left'} size={18} /></span>
+          <span className="admNavText">Collapse</span>
+        </button>
       </aside>
 
       <div className="admMain">
         <div className="admTopbar">
           <span className="admWho">Signed in as <b>staff</b></span>
-          <a className="admIconBtn" href="/" target="_blank" rel="noopener noreferrer" title="Kiosk (new tab)" aria-label="Open kiosk in a new tab">
-            <Icon name="cart" size={19} />
-          </a>
           <button className="admIconBtn" onClick={toggleTheme} aria-label="Switch light or dark mode">
             <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={19} />
           </button>

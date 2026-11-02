@@ -1,10 +1,10 @@
 import { Router } from '../asyncRouter.js';
 import { pool, transaction, httpError } from '../db.js';
-import { requireAuth } from '../auth.js';
+import { requireAdminOrStaff } from '../auth.js';
 import { applyMovements } from '../stock.js';
 
 const router = Router();
-router.use(requireAuth);
+router.use(requireAdminOrStaff);
 
 // body: { changes: [{ barcode, delta | setTo, reason, note }] }
 router.post('/adjust', async (req, res) => {

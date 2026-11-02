@@ -6,13 +6,13 @@
   z-index: 1000;
   display: grid;
   place-items: center;
-  padding: 16px;
+  padding: 1rem;
   background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(0.3125rem);
 }
 
 .coCard {
-  width: min(460px, 100%);
+  width: min(28.75rem, 100%);
   max-height: 94vh;
   display: flex;
   flex-direction: column;
@@ -20,24 +20,24 @@
   background: var(--colorCardBg);
   color: var(--colorTextMain);
   border: 2px solid var(--colorCardBorder);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 1.5rem 4.375rem rgba(0, 0, 0, 0.5);
   overflow: hidden;
   animation: coPop 0.2s ease-out;
 }
-@keyframes coPop { from { transform: translateY(12px) scale(0.97); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes coPop { from { transform: translateY(0.75rem) scale(0.97); opacity: 0; } to { transform: none; opacity: 1; } }
 
 .coHead { padding: 1.4rem 1.5rem 0.4rem; text-align: center; }
 .coHead h2 { font-size: 1.5rem; font-weight: 800; }
 .coMuted { color: var(--colorTextMuted); }
 
-.coBody { padding: 0.5rem 1.5rem 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.coBody { padding: 0.5rem 1.5rem 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
 
 /* payment */
 .coTotalBox {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 18px;
+  padding: 0.875rem 1.125rem;
   border-radius: 1.1rem;
   background: var(--colorBg);
   border: 1px solid var(--colorCardBorder);
@@ -46,13 +46,13 @@
 
 .coLabel { font-weight: 700; font-size: 0.95rem; color: var(--colorTextSub); }
 
-.coMethods { display: flex; flex-direction: column; gap: 8px; }
+.coMethods { display: flex; flex-direction: column; gap: 0.5rem; }
 .coMethod {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 0.875rem;
   width: 100%;
-  padding: 14px 16px;
+  padding: 0.875rem 1rem;
   border-radius: 1rem;
   border: 2px solid var(--colorCardBorder);
   background: var(--colorBg);
@@ -70,8 +70,8 @@
 .coMethodText { flex: 1; display: flex; flex-direction: column; font-size: 1.05rem; }
 .coMethodText span { font-size: 0.85rem; color: var(--colorTextMuted); }
 .coSoon {
-  padding: 3px 10px;
-  border-radius: 999px;
+  padding: 3px 0.625rem;
+  border-radius: 62.4375rem;
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -79,10 +79,10 @@
   color: var(--colorTextSub);
 }
 
-.coActions { display: flex; gap: 10px; padding: 0 1.5rem 1.5rem; }
+.coActions { display: flex; gap: 0.625rem; padding: 0 1.5rem 1.5rem; }
 .coBtn {
   flex: 1;
-  min-height: 60px;
+  min-height: 3.75rem;
   border-radius: 1rem;
   border: 1px solid var(--colorButtonBorder);
   background: var(--colorButtonBg);
@@ -98,8 +98,8 @@
 
 /* receipt */
 .coCheck {
-  width: 62px;
-  height: 62px;
+  width: 3.875rem;
+  height: 3.875rem;
   margin: 0 auto 0.5rem;
   display: grid;
   place-items: center;
@@ -121,18 +121,18 @@
 .coTear::after {
   content: '';
   position: absolute;
-  top: -15px;
-  width: 26px;
-  height: 26px;
+  top: -0.9375rem;
+  width: 1.625rem;
+  height: 1.625rem;
   border-radius: 50%;
   background: var(--colorBg);
   border: 2px solid var(--colorCardBorder);
 }
-.coTear::before { left: -15px; }
-.coTear::after { right: -15px; }
+.coTear::before { left: -0.9375rem; }
+.coTear::after { right: -0.9375rem; }
 
-.coLines { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 26vh; overflow-y: auto; }
-.coLine { display: flex; justify-content: space-between; gap: 12px; font-size: 1rem; }
+.coLines { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; max-height: 26vh; overflow-y: auto; }
+.coLine { display: flex; justify-content: space-between; gap: 0.75rem; font-size: 1rem; }
 .coLine span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .coLine b { white-space: nowrap; }
 
@@ -140,7 +140,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 12px;
+  padding-top: 0.75rem;
   border-top: 1px solid var(--colorCardBorder);
   font-size: 1.15rem;
 }
@@ -149,16 +149,16 @@
 .coNote { text-align: center; font-size: 0.98rem; line-height: 1.45; color: var(--colorTextSub); }
 
 /* cash acceptor */
-.coCash { border: 1px solid var(--colorCardBorder); border-radius: 1.1rem; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
+.coCash { border: 1px solid var(--colorCardBorder); border-radius: 1.1rem; padding: 0.875rem 1.125rem; display: flex; flex-direction: column; gap: 0.625rem; }
 .coCashRow { display: flex; justify-content: space-between; align-items: baseline; }
 .coCashNum { font-size: 2.4rem; font-weight: 800; color: var(--colorTextMain); }
-.coBar { height: 12px; border-radius: 999px; background: var(--colorBg); border: 1px solid var(--colorCardBorder); overflow: hidden; }
+.coBar { height: 0.75rem; border-radius: 62.4375rem; background: var(--colorBg); border: 1px solid var(--colorCardBorder); overflow: hidden; }
 .coBar span { display: block; height: 100%; background: var(--colorBrand); transition: width 0.25s; }
 .coCashMsg { font-size: 1.1rem; color: var(--colorTextSub); text-align: center; }
 .coCashMsg.good { color: #1f8a4c; font-weight: 700; }
-.coSim { border: 2px dashed var(--colorCardBorder); border-radius: 1rem; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.coSim { border: 2px dashed var(--colorCardBorder); border-radius: 1rem; padding: 0.625rem; display: flex; flex-direction: column; gap: 0.5rem; }
 .coSimTag { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.06em; color: var(--colorTextMuted); }
-.coSimRow { display: flex; flex-wrap: wrap; gap: 8px; }
-.coSimBtn { min-height: 48px; min-width: 64px; padding: 0 14px; border-radius: 0.8rem; border: 1px solid var(--colorButtonBorder); background: var(--colorButtonBg); color: var(--colorTextMain); font-weight: 800; font-size: 1rem; cursor: pointer; }
-.coSimBtn.coin { border-radius: 999px; }
+.coSimRow { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.coSimBtn { min-height: 3rem; min-width: 4rem; padding: 0 0.875rem; border-radius: 0.8rem; border: 1px solid var(--colorButtonBorder); background: var(--colorButtonBg); color: var(--colorTextMain); font-weight: 800; font-size: 1rem; cursor: pointer; }
+.coSimBtn.coin { border-radius: 62.4375rem; }
 .coSimBtn:active { transform: scale(0.95); }

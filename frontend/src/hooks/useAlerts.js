@@ -51,8 +51,8 @@ export function useAlerts() {
       items.push({
         id: 'unpaid', level: 'warning', kind: 'orders', icon: 'receipt',
         title: `${staleUnpaid} order${staleUnpaid > 1 ? 's' : ''} waiting for payment over ${STALE_MIN} min`,
-        detail: 'Check the staff screen.',
-        to: '/staff',
+        detail: 'Check Orders & printing.',
+        to: '/admin/orders',
       });
     }
     const owed = [...orders, ...queue].filter((x) => x.change > 0 && !x.changeGiven && x.status !== 'Cancelled');
@@ -61,8 +61,8 @@ export function useAlerts() {
       items.push({
         id: 'change', level: 'warning', kind: 'orders', icon: 'cash',
         title: `${owed.length} customer${owed.length > 1 ? 's are' : ' is'} owed change (₱${sum.toFixed(2)})`,
-        detail: 'The cash machine does not give change. Hand it over from the staff screen.',
-        to: '/staff',
+        detail: 'The cash machine does not give change. Hand it over at the counter.',
+        to: '/admin/orders',
       });
     }
     const staleJobs = queue.filter(
@@ -73,7 +73,7 @@ export function useAlerts() {
         id: 'jobs', level: 'warning', kind: 'print', icon: 'printer',
         title: `${staleJobs} print job${staleJobs > 1 ? 's' : ''} waiting over ${STALE_MIN} min`,
         detail: 'Customers are waiting in the print queue.',
-        to: '/staff',
+        to: '/admin/orders?tab=print',
       });
     }
 

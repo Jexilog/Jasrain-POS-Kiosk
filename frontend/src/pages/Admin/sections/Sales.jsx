@@ -130,7 +130,7 @@ export default function Sales() {
                     { key: 'bw', label: 'Black & white sheets', value: p.bwSheets },
                     { key: 'color', label: 'Color sheets', value: p.colorSheets },
                   ]} format={(v) => `${int(v)} sheets`} />
-                  <div style={{ height: 12 }} />
+                  <div style={{ height: '0.75rem' }} />
                   <HBars rows={paperRows} format={(v) => `${int(v)} sheets`} />
                   <p className="admHint">Average job: <b>{peso(p.avgJob, 0)}</b> · {int(p.sheets)} sheets printed</p>
                 </>

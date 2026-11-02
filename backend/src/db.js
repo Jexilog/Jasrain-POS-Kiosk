@@ -10,7 +10,11 @@ export const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   decimalNumbers: true, // return DECIMAL columns as numbers, not strings
+  timezone: 'Z',        // JS dates are sent and read as UTC
 });
+
+// the database clock (NOW(), CURRENT_TIMESTAMP) also works in UTC, whatever the host's timezone is
+pool.pool.on('connection', (conn) => conn.query("SET time_zone = '+08:00'"));
 
 // runs work(conn) inside a transaction: all changes are saved together or not at all
 export async function transaction(work) {

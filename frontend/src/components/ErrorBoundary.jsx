@@ -16,12 +16,12 @@ export default class ErrorBoundary extends React.Component {
     if (!this.state.hasError) return this.props.children;
 
     return (
-      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', textAlign: 'center', padding: 24 }}>
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', textAlign: 'center', padding: '1.5rem' }}>
         <div>
           <h1>Something went wrong</h1>
           <p>Please tap the button to restart.</p>
           <button
-            style={{ padding: '12px 24px', fontSize: 18, cursor: 'pointer' }}
+            style={{ padding: '0.75rem 1.5rem', fontSize: '1.125rem', cursor: 'pointer' }}
             onClick={() => window.location.assign('/')}
           >
             Restart

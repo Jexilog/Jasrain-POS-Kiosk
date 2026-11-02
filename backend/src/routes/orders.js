@@ -1,6 +1,6 @@
 import { Router } from '../asyncRouter.js';
 import { pool, transaction, httpError } from '../db.js';
-import { requireAuth } from '../auth.js';
+import { requireAdminOrStaff} from '../auth.js';
 import { applyMovements, nextNumber } from '../stock.js';
 
 const router = Router();
@@ -16,6 +16,7 @@ const toOrder = (r, items) => ({
   paidAt: r.paid_at,
   ...(r.cash_received != null ? { cashReceived: r.cash_received, change: r.change_amount, changeGiven: Boolean(r.change_given) } : {}),
   demo: Boolean(r.is_demo),
+  archived: Boolean(r.archived),
   items: items.map(({ order_number, ...i }) => i),
 });
 
@@ -29,7 +30,7 @@ async function loadOrders(where = '', params = []) {
   return orders.map((o) => toOrder(o, items.filter((i) => i.order_number === o.order_number)));
 }
 
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAdminOrStaff, async (req, res) => {
   res.json(await loadOrders());
 });
 
@@ -42,11 +43,20 @@ router.post('/', async (req, res) => {
   const orderNumber = await transaction(async (conn) => {
     const number = await nextNumber(conn, 'store_order', 'order_number', 'A');
 
-    // work out the lines and the total from the product table
-    const lines = [];
+    // the same barcode sent twice becomes one line (otherwise stock could be checked twice and oversold)
+    const wanted = new Map();
     for (const i of items) {
       const quantity = Math.floor(Number(i.quantity));
       if (!(quantity > 0)) throw httpError(400, 'Quantity must be 1 or more.');
+      const code = String(i.barcode ?? '').trim();
+      wanted.set(code, (wanted.get(code) || 0) + quantity);
+    }
+
+    // work out the lines and the total from the product table
+    // (products are locked in barcode order so two orders at once cannot get stuck on each other)
+    const lines = [];
+    for (const [barcode, quantity] of [...wanted].sort(([a], [b]) => a.localeCompare(b))) {
+      const i = { barcode };
       const [rows] = await conn.query('SELECT * FROM product WHERE barcode = ? FOR UPDATE', [i.barcode]);
       if (!rows.length || !rows[0].active) throw httpError(400, `Item ${i.barcode} is not available.`);
       const p = rows[0];
@@ -91,13 +101,13 @@ router.post('/', async (req, res) => {
   res.status(201).json(order);
 });
 
-router.post('/:orderNumber/pay', requireAuth, async (req, res) => {
+router.post('/:orderNumber/pay', requireAdminOrStaff, async (req, res) => {
   await pool.query("UPDATE store_order SET status = 'Paid', paid_at = NOW() WHERE order_number = ?", [req.params.orderNumber]);
   res.json({ ok: true });
 });
 
 // cancelling an unpaid order puts the items back in stock
-router.post('/:orderNumber/cancel', requireAuth, async (req, res) => {
+router.post('/:orderNumber/cancel', requireAdminOrStaff, async (req, res) => {
   const number = req.params.orderNumber;
   await transaction(async (conn) => {
     const [rows] = await conn.query('SELECT status, is_demo FROM store_order WHERE order_number = ? FOR UPDATE', [number]);
@@ -117,13 +127,19 @@ router.post('/:orderNumber/cancel', requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
-router.post('/:orderNumber/give-change', requireAuth, async (req, res) => {
+router.post('/:orderNumber/give-change', requireAdminOrStaff, async (req, res) => {
   await pool.query('UPDATE store_order SET change_given = TRUE WHERE order_number = ?', [req.params.orderNumber]);
   res.json({ ok: true });
 });
 
-router.delete('/:orderNumber', requireAuth, async (req, res) => {
-  await pool.query('DELETE FROM store_order WHERE order_number = ?', [req.params.orderNumber]);
+// "Remove" only hides the order from the staff list. The sale stays in the database and the reports.
+router.delete('/:orderNumber', requireAdminOrStaff, async (req, res) => {
+  const [rows] = await pool.query('SELECT status, change_amount, change_given FROM store_order WHERE order_number = ?', [req.params.orderNumber]);
+  if (!rows.length) throw httpError(404, 'Order not found.');
+  const o = rows[0];
+  if (o.status === 'Unpaid') throw httpError(409, 'Cancel an unpaid order before removing it.');
+  if (o.change_amount > 0 && !o.change_given) throw httpError(409, 'Give the customer their change first.');
+  await pool.query('UPDATE store_order SET archived = TRUE WHERE order_number = ?', [req.params.orderNumber]);
   res.json({ ok: true });
 });
 

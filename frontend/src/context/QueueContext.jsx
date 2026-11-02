@@ -23,7 +23,7 @@ export function QueueProvider({ children }) {
   usePolling(refreshQueue, 4000, String(isAuthenticated));
 
   // Derived, so it can never get out of sync with the queue
-  const currentQueue = queue.find((item) => item.status === 'Printing')?.queueNumber ?? null;
+  const currentQueue = queue.find((item) => item.status === 'Printing' && !item.archived)?.queueNumber ?? null;
 
   // The server makes the queue number and works out the price.
   // Throws if the job could not be saved.
@@ -68,7 +68,7 @@ export function QueueProvider({ children }) {
 
   // Call the next waiting customer
   const nextQueue = () => {
-    const next = queue.find((item) => item.status === 'Waiting');
+    const next = queue.find((item) => item.status === 'Waiting' && !item.archived);
     if (next) setStatus(next.queueNumber, 'Printing');
   };
 

@@ -1,0 +1,66 @@
+.basketScreen.darkMode {
+  --colorBg: #0f172a; --colorBrand: #38bdf8; --colorTextMain: #ffffff; --colorTextMuted: #94a3b8;
+  --colorCardBg: #1e293b; --colorCardBorder: #334155; --colorButtonBg: #1e293b; --colorButtonBorder: #475569;
+}
+.basketScreen.lightMode {
+  --colorBg: #f8fafc; --colorBrand: #0284c7; --colorTextMain: #0f172a; --colorTextMuted: #64748b;
+  --colorCardBg: #ffffff; --colorCardBorder: #cbd5e1; --colorButtonBg: #ffffff; --colorButtonBorder: #94a3b8;
+}
+.basketScreen { min-height: 100vh; background: var(--colorBg); color: var(--colorTextMain); font-family: inherit; }
+.basketScreen button { font-family: inherit; cursor: pointer; }
+
+.basketHeader { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--colorCardBorder); }
+.basketHeader h1 { font-size: 1.4rem; }
+.basketBack { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 0.8rem; border: 1px solid var(--colorButtonBorder); background: var(--colorButtonBg); color: var(--colorTextMain); font-weight: 700; }
+
+.basketBody { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; padding: 20px; align-items: start; }
+@media (max-width: 900px) { .basketBody { grid-template-columns: 1fr; } }
+
+.basketView { position: relative; aspect-ratio: 16 / 9; border-radius: 1.2rem; overflow: hidden; background: #020617; border: 1px solid var(--colorCardBorder); }
+.basketVideo { width: 100%; height: 100%; object-fit: contain; }
+.basketFake {
+  width: 100%; height: 100%; display: grid; place-items: center; color: #475569; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  background: repeating-linear-gradient(0deg, transparent 0 39px, #1e293b 39px 40px), repeating-linear-gradient(90deg, transparent 0 39px, #1e293b 39px 40px);
+}
+.basketBox { position: absolute; border: 2px solid #22c55e; border-radius: 6px; transition: all 0.4s linear; pointer-events: none; }
+.basketBox span { position: absolute; left: -2px; top: -22px; padding: 1px 6px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; background: #22c55e; color: #052e16; border-radius: 4px; }
+.basketBox.unknown { border-color: #ef4444; }
+.basketBox.unknown span { background: #ef4444; color: #fff; }
+
+.basketSide { display: flex; flex-direction: column; gap: 14px; }
+.basketStatus { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 1.2rem; background: var(--colorCardBg); border: 1px solid var(--colorCardBorder); }
+.basketStatus strong { display: block; font-size: 1.3rem; }
+.basketStatus small { color: var(--colorTextMuted); font-size: 0.95rem; }
+.basketStatus.empty { border-color: #22c55e; color: #22c55e; }
+.basketStatus.empty strong { color: var(--colorTextMain); }
+.basketStatus.items { border-color: var(--colorBrand); color: var(--colorBrand); }
+.basketStatus.items strong { color: var(--colorTextMain); }
+.basketStatus.error { border-color: #ef4444; color: #ef4444; }
+.basketStatus.error strong { color: var(--colorTextMain); }
+
+.basketWarn { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-radius: 1rem; border: 1px solid #ef4444; color: #ef4444; font-weight: 700; }
+
+.basketList { list-style: none; margin: 0; padding: 0; border-radius: 1.2rem; overflow: hidden; border: 1px solid var(--colorCardBorder); background: var(--colorCardBg); }
+.basketList li { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 12px 16px; }
+.basketList li + li { border-top: 1px solid var(--colorCardBorder); }
+.basketList b { font-size: 1.1rem; }
+.basketList small { color: var(--colorTextMuted); min-width: 70px; text-align: right; }
+
+.basketSim { border: 2px dashed var(--colorCardBorder); border-radius: 1rem; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.basketSimTag { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.06em; color: var(--colorTextMuted); }
+.basketChips { display: flex; flex-wrap: wrap; gap: 6px; }
+.basketChip { display: inline-flex; border-radius: 999px; overflow: hidden; border: 1px solid var(--colorButtonBorder); background: var(--colorButtonBg); }
+.basketChip button { border: 0; background: transparent; color: var(--colorTextMain); min-height: 38px; padding: 0 12px; font-weight: 600; }
+.basketChip button + button { border-left: 1px solid var(--colorButtonBorder); padding: 0 14px; }
+.basketChip button:active, .basketClear:active { transform: scale(0.96); }
+.basketClear { min-height: 44px; border-radius: 0.8rem; border: 1px solid var(--colorButtonBorder); background: var(--colorButtonBg); color: var(--colorTextMain); font-weight: 700; }
+
+.basketPhoto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #020617; }
+.basketStatus.unnamed, .basketStatus.needsReference { border-color: #f59e0b; color: #f59e0b; }
+.basketStatus.unnamed strong, .basketStatus.needsReference strong { color: var(--colorTextMain); }
+.basketTools { border: 2px dashed var(--colorCardBorder); border-radius: 1rem; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.basketFacts { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.basketFacts div { display: flex; justify-content: space-between; gap: 12px; font-size: 0.95rem; }
+.basketFacts dt { color: var(--colorTextMuted); }
+.basketFacts dd { margin: 0; font-weight: 700; text-align: right; }
+.basketNote { margin: 0; color: var(--colorTextMuted); font-size: 0.95rem; }

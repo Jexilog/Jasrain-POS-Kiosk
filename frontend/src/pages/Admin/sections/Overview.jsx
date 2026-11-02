@@ -62,12 +62,6 @@ export default function Overview() {
       <PageHeader
         title={`${greeting()}, ${admin?.username || 'admin'}`}
         subtitle={`${dateLong(new Date())} · here is how the store is doing`}
-        actions={
-          <>
-            <Link className="admBtn" to="/staff">Staff screen</Link>
-            <Link className="admBtn primary" to="/">Open kiosk</Link>
-          </>
-        }
       />
 
       <div className="admGrid c4">
@@ -149,7 +143,7 @@ export default function Overview() {
           {alerts.items.length === 0 ? (
             <EmptyState icon="check-circle" title="All clear" hint="Stock levels are healthy and nothing is waiting too long." />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {alerts.items.slice(0, 5).map((a) => (
                 <Link key={a.id} to={a.to} className={`admAlertRow ${a.level}`}>
                   <Icon name={a.icon} size={22} />

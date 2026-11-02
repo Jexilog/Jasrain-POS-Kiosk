@@ -55,8 +55,34 @@ export function attachUser(req, res, next) {
   next();
 }
 
-// use on routes that only staff or the admin may call
-export function requireAuth(req, res, next) {
-  if (!req.user) return next(httpError(401, 'Please sign in.'));
+export function requireAuth(req, res, next){
+  if(!req.user){
+    return next(httpError(401, 'Please sign in.'));
+  }
+
+  next();
+}
+
+export function requireAdmin(req, res, next){
+  if(!req.user){
+    return next(httpError(401, 'Please sign in.'));
+  }
+  if(req.user.role !== 'Administrator'){
+    return next(httpError(403, 'Only the administrator can do this.'))
+  }
+
+  next();
+}
+
+// use on routes calling the administrator or staff for access
+export function requireAdminOrStaff(req, res, next) {
+  if (!req.user) {
+    return next(httpError(401, 'Please sign in.'));
+  }
+
+  if (!['Administrator', 'Staff'].includes(req.user.role)) {
+    return next(httpError(403, 'Access Denied'));
+  }
+
   next();
 }
