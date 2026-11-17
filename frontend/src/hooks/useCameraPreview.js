@@ -6,6 +6,7 @@ import { makeVote } from '../utils/emptyCheck';
 import { makePresence } from '../utils/cartPresence';
 import { getMinScore } from '../utils/cartModel';
 import { isPiCart, cartUrl } from '../utils/piCart';
+import { piFetch } from '../utils/piFetch';
 import {
   grabCartGrid, averageCartGrids, insideChanged, saveEmptyCartPhoto, loadEmptyCartPhoto, getItemLimit,
 } from '../utils/cartContents';
@@ -44,7 +45,7 @@ export function useCameraPreview(videoRef) {
     const poll = async () => {
       try {
         const query = new URLSearchParams({ on: '1', score: String(getMinScore()), limit: String(getItemLimit()) });
-        const res = await fetch(`${cartUrl()}/cart/state?${query}`, { cache: 'no-store' });
+        const res = await piFetch(`${cartUrl()}/cart/state?${query}`, { cache: 'no-store' });
         const s = await res.json();
         if (!stopped) setState((prev) => ({ ...prev, ...s, camera: s.camera === 'off' ? 'starting' : s.camera }));
       } catch (e) {
@@ -61,7 +62,7 @@ export function useCameraPreview(videoRef) {
     // The Pi's picture is drawn on a canvas that feeds the <video>, so the existing screens need no change.
     const picture = async () => {
       try {
-        const res = await fetch(`${cartUrl()}/cart/preview.jpg?n=${Date.now()}`, { cache: 'no-store' });
+        const res = await piFetch(`${cartUrl()}/cart/preview.jpg?n=${Date.now()}`, { cache: 'no-store' });
         if (res.ok && !stopped) {
           const bitmap = await createImageBitmap(await res.blob());
           if (canvas.width !== bitmap.width || canvas.height !== bitmap.height) {
@@ -77,7 +78,7 @@ export function useCameraPreview(videoRef) {
           }
         }
       } catch (e) { /* the state poll shows the problem */ }
-      if (!stopped) pictureTimer = setTimeout(picture, 80);
+      if (!stopped) pictureTimer = setTimeout(picture, 150);
     };
 
     poll();
@@ -200,7 +201,7 @@ export function useCameraPreview(videoRef) {
   const saveEmptyCart = useCallback(async () => {
     if (isPiCart()) {
       try {
-        const res = await fetch(`${cartUrl()}/cart/empty-photo`, { method: 'POST' });
+        const res = await piFetch(`${cartUrl()}/cart/empty-photo`, { method: 'POST' });
         return await res.json();
       } catch (e) {
         return { ok: false, error: 'Cannot reach the Pi camera.' };

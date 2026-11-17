@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CASH_MODE, piUrl } from '../utils/cash';
+import { piFetch } from '../utils/piFetch';
 
 const KEY = 'jasrain_cash_pending';
-const POLL_MS = 400;
+const POLL_MS = 500;
 const SETTLE_MS = 1500; // wait a bit in case another bill is going in
 
 const read = (total) => {
@@ -54,7 +55,7 @@ export function useCashSession(total, onComplete, blocked = false) {
       if (busy || doneRef.current || blockedRef.current) return;
       busy = true;
       try {
-        const res = await fetch(`${piUrl()}/cash/take`, { cache: 'no-store' });
+        const res = await piFetch(`${piUrl()}/cash/take`, { cache: 'no-store' });
         const data = await res.json();
         (data.events || []).forEach((e) => accept(e.amount, e.kind));
         setLink('ok');
@@ -72,7 +73,7 @@ export function useCashSession(total, onComplete, blocked = false) {
   // Tell the Pi when it may take cash (it can switch the acceptors off while blocked or finished).
   useEffect(() => {
     if (CASH_MODE !== 'hardware') return undefined;
-    const send = (on) => fetch(`${piUrl()}/enable`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ on }) }).catch(() => {});
+    const send = (on) => piFetch(`${piUrl()}/enable`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ on }) }).catch(() => {});
     send(!blocked && !done);
     return () => { send(false); };
   }, [blocked, done]);

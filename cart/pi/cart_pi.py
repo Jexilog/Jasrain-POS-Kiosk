@@ -32,7 +32,7 @@ PORT = 8766
 CART_SIZE = 320
 CHECK_EVERY = 0.5            # seconds between checks (the kiosk used 500 ms)
 GRID_W, GRID_H = 64, 36
-PIXEL_DIFF = 35
+PIXEL_DIFF = 25
 INSIDE = 0.12
 # Webcam settings. If the picture shows torn lines, try CAM_FORMAT = '' (the webcam's own default), then CAM_FPS = 15.
 CAM_FORMAT = 'MJPG'          # 'MJPG' = compressed pictures, or '' to leave the webcam's default
