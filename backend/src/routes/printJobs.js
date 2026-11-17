@@ -78,11 +78,11 @@ router.post('/', async (req, res) => {
 
     const queueNumber = await nextNumber(conn, 'print_job', 'queue_number', 'P');
     const [result] = await conn.query(
-      `INSERT INTO print_job (queue_number, upload_token, receipt_token,file_name, file_size, file_type, pages, copies, color, paper_size,
+      `INSERT INTO print_job (queue_number, upload_token, receipt_token, file_name, file_size, file_type, pages, copies, color, paper_size,
                               total, payment, cash_received, change_amount, change_given)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [queueNumber, uploadToken, receiptToken,String(j.fileName).slice(0, 255), j.fileSize ?? null, j.fileType ?? null, pages, copies, color,
-       j.paperSize || 'Short', total, j.payment || 'Cash', received, change, change === 0]
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [queueNumber, uploadToken, receiptToken, String(j.fileName).slice(0, 255), j.fileSize ?? null, j.fileType ?? null, pages, copies, color,
+      j.paperSize || 'Short', total, j.payment || 'Cash', received, change, change === 0]
     );
     return result.insertId;
   });
