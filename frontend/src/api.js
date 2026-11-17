@@ -1,6 +1,7 @@
 // All talking to the backend goes through here.
 // In development Vite forwards /api to the backend (see vite.config.js).
 const BASE = import.meta.env.VITE_API_URL || '/api';
+export const API_BASE = BASE;
 const TOKEN_KEY = 'jasrain_token';
 
 export const getToken = () => sessionStorage.getItem(TOKEN_KEY);

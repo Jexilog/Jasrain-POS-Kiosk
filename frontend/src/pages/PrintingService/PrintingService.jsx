@@ -5,6 +5,7 @@ import { useKiosk } from '../../context/KioskContext';
 import { useQueueContext } from '../../context/QueueContext';
 import { useSettings } from '../../context/SettingsContext';
 import CashPaymentModal from '../SelfCheckout/components/CashPaymentModal';
+import { API_BASE } from '../../api';
 import { saveFile } from '../../utils/fileStore';
 import { dropFile } from '../../utils/incoming';
 import { useIdleTimer } from '../../hooks/useIdleTimer';
@@ -100,7 +101,7 @@ export default function Printing() {
   const [saving, setSaving] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [receiptOpen, setReceiptOpen] = useState(null);
+  const [receiptOpen, setReceiptOpen] = useState(false);
   const [fileUrl, setFileUrl] = useState(null);
  
  
@@ -241,7 +242,7 @@ export default function Printing() {
     setPadFor(null);
   }; 
 
-  const receiptUrl = ticket && ticket.receiptToken ? `/api/print-jobs/${ticket.id}/receipt?token=${ticket.receiptToken}` : null;
+  const receiptUrl = ticket && ticket.receiptToken ? `${API_BASE}/print-jobs/${ticket.id}/receipt?token=${ticket.receiptToken}` : null;
   const minutes = ticket ? Math.max(2, (ticket.ahead + 1) * 2) : 0;
   return (
     <div className={`checkoutScreen ${theme}Mode printScreen`}>
@@ -288,16 +289,11 @@ export default function Printing() {
                   <Icon name="eye" size={18} /> {t('View my file')}
                 </button>
               )}
-              {file && (
-                  <button className="prGhost prViewBtn" onClick={() => setPreviewOpen(true)}>
-                    <Icon name="eye" size={18} /> {t('View my file')}
-                  </button>
-                )}
-                {receiptUrl && (
-                  <button className="prGhost prViewBtn" onClick={() => setReceiptOpen(true)}>
-                    <Icon name="file" size={18} /> {t('View receipt')}
-                  </button>
-                )}
+              {receiptUrl && (
+                <button className="prGhost prViewBtn" onClick={() => setReceiptOpen(true)}>
+                  <Icon name="file" size={18} /> {t('View receipt')}
+                </button>
+              )}
               <p className="prTicketNote">
                 {ticket.fileLost
                   ? <>{t('Your payment was received but we could not save your file. Please show this ticket to staff.')}</>
@@ -450,12 +446,6 @@ export default function Printing() {
         </div>
       )}
 
-      {receiptUrl && (
-        <button className="prGhost prViewBtn" onClick={() => setReceiptOpen(true)}>
-          <Icon name="file" size={18} /> {t('View receipt')}
-        </button>
-      )}
-
       {receiptOpen && receiptUrl && (
         <div className="prPreviewOverlay" onClick={() => setReceiptOpen(false)}>
           <div className="prPreviewCard" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Receipt">
@@ -493,4 +483,3 @@ export default function Printing() {
     </div>
   );
 }
- 
