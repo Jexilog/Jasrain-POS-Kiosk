@@ -6,6 +6,7 @@ import { useQueueContext } from '../../context/QueueContext';
 import { useSettings } from '../../context/SettingsContext';
 import CashPaymentModal from '../SelfCheckout/components/CashPaymentModal';
 import { API_BASE } from '../../api';
+import { printJobReceipt, reprintJobReceipt, connectPrinter } from '../../utils/printer';
 import { saveFile } from '../../utils/fileStore';
 import { dropFile } from '../../utils/incoming';
 import { useIdleTimer } from '../../hooks/useIdleTimer';
@@ -102,6 +103,7 @@ export default function Printing() {
   const [payOpen, setPayOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
+  const [printError, setPrintError] = useState('');
   const [fileUrl, setFileUrl] = useState(null);
  
  
@@ -224,6 +226,22 @@ export default function Printing() {
     setPaper('Short');
   };
  
+  // Print the paper receipt once, as soon as the ticket is shown
+  useEffect(() => {
+    if (!ticket) { setPrintError(''); return; }
+    printJobReceipt(ticket).then((r) => setPrintError(r.ok ? '' : r.error));
+  }, [ticket]);
+
+  // If the printer is not connected, this opens the picker once, then prints
+  const printAgain = async () => {
+    let r = await reprintJobReceipt(ticket);
+    if (!r.ok) {
+      const c = await connectPrinter();
+      r = c.ok ? await reprintJobReceipt(ticket) : c;
+    }
+    setPrintError(r.ok ? '' : r.error);
+  };
+
   // Ticket screen goes back to the menu by itself after a while
   useEffect(() => {
     if (!ticket) return undefined;
@@ -294,6 +312,10 @@ export default function Printing() {
                   <Icon name="file" size={18} /> {t('View receipt')}
                 </button>
               )}
+              <button className="prGhost prViewBtn" onClick={printAgain}>
+                <Icon name="printer" size={18} /> {t('Print receipt')}
+              </button>
+              {printError && <p className="prTicketNote">{printError}</p>}
               <p className="prTicketNote">
                 {ticket.fileLost
                   ? <>{t('Your payment was received but we could not save your file. Please show this ticket to staff.')}</>
@@ -483,3 +505,4 @@ export default function Printing() {
     </div>
   );
 }
+ 

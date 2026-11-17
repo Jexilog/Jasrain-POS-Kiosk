@@ -220,3 +220,63 @@ export async function printReceipt(order) {
 // for the "Print again" button
 export const reprintReceipt = (order) => send(buildReceipt(order));
 export const printTestSlip = () => send(buildTestSlip());
+
+// ---------- print job (queue ticket + receipt) ----------
+
+export function buildJobReceipt(job) {
+  const w = writer();
+  const when = new Date(job.createdAt || Date.now()).toLocaleString('en-PH', {
+    month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
+  });
+  const perPage = job.pages * job.copies > 0 ? job.total / (job.pages * job.copies) : 0;
+
+  w.raw(ESC, 0x40);
+  w.raw(ESC, 0x61, 1);
+  w.raw(GS, 0x21, 0x11);
+  w.line(SHOP);
+  w.raw(GS, 0x21, 0x00);
+  w.line(SHOP_SUB);
+  w.line(when);
+  w.raw(ESC, 0x61, 0);
+  w.line('-'.repeat(LINE));
+  w.raw(ESC, 0x61, 1);
+  w.line('Your queue number');
+  w.raw(GS, 0x21, 0x11);
+  w.line(job.queueNumber);
+  w.raw(GS, 0x21, 0x00);
+  w.raw(ESC, 0x61, 0);
+  w.line('-'.repeat(LINE));
+  w.line(String(job.fileName).slice(0, LINE));
+  w.line(twoCols(`${job.pages} pg x ${job.copies} copy`, `${money(perPage)}/pg`));
+  w.line(twoCols(job.color === 'color' ? 'Colored' : 'Black & White', job.paperSize));
+  w.line('-'.repeat(LINE));
+  w.raw(ESC, 0x45, 1);
+  w.line(twoCols('TOTAL', money(job.total)));
+  w.raw(ESC, 0x45, 0);
+  if (job.cashReceived != null) w.line(twoCols('Cash', money(job.cashReceived)));
+  if (job.change > 0) {
+    w.line(twoCols('Change due', money(job.change)));
+    w.line('');
+    w.line('The machine gives no change.');
+    w.line('Show this slip to the cashier.');
+  }
+  w.line('');
+  w.raw(ESC, 0x61, 1);
+  w.line('Watch the screen for');
+  w.line(job.queueNumber);
+  w.line('Thank you!');
+  w.raw(ESC, 0x64, 4);
+  return w.done();
+}
+
+const printedJobs = new Set(); // React can run an effect twice; never print the same ticket twice
+
+export async function printJobReceipt(job) {
+  if (printedJobs.has(job.id)) return { ok: true, skipped: true };
+  printedJobs.add(job.id);
+  const result = await send(buildJobReceipt(job));
+  if (!result.ok) printedJobs.delete(job.id);
+  return result;
+}
+
+export const reprintJobReceipt = (job) => send(buildJobReceipt(job));
