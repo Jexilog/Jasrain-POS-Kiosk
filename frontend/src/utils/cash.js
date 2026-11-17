@@ -2,11 +2,13 @@
 // 'simulator' = on-screen buttons for testing.
 // 'hardware' = real bill/coin acceptors read by the Raspberry Pi (see the pi folder).
 //   The kiosk asks the Pi for new cash a few times a second. Handled in hooks/useCashSession.js.
-export const CASH_MODE = 'simulator';
+export const CASH_MODE = 'hardware';
 
 // Where the Pi program is running. Change the address to your Pi's (find it with: hostname -I on the Pi).
 // Or set it from the browser console without editing code:  localStorage.setItem('jasrain_pi_url', 'http://192.168.1.50:8765')
-const DEFAULT_PI_URL = 'http://raspberrypi.local:8765';
+// 'localhost' because the kiosk PC forwards localhost:8765 to the Pi (netsh portproxy or an SSH tunnel).
+// An https site cannot call http://<LAN address>, but it can call http://localhost.
+const DEFAULT_PI_URL = 'http://localhost:8765';
 export const piUrl = () => {
   try {
     return localStorage.getItem('jasrain_pi_url') || DEFAULT_PI_URL;

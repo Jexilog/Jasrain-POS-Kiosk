@@ -14,7 +14,13 @@ import settings from './routes/settings.js';
 import data from './routes/data.js';
 
 const app = express();
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173' }));
+// FRONTEND_URL can hold several addresses separated by commas,
+// e.g. https://your-site.up.railway.app,http://localhost:5173
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
+  .split(',')
+  .map((s) => s.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json({ limit: '5mb' }));
 app.use(attachUser);
 

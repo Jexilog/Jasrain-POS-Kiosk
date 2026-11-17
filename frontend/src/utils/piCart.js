@@ -3,7 +3,7 @@
 //   'pi'      = the camera plugs into the Raspberry Pi and cart_pi.py does the looking.
 // To try it without editing code, run this in the browser console, then refresh:
 //   localStorage.setItem('jasrain_cart_source', 'pi')       (back: localStorage.removeItem('jasrain_cart_source'))
-export const CART_SOURCE = 'browser';
+export const CART_SOURCE = 'pi';
 
 export const isPiCart = () => {
   try {
@@ -21,7 +21,7 @@ export const cartUrl = () => {
     const v = localStorage.getItem('jasrain_cart_url');
     if (v) return v.replace(/\/$/, '');
   } catch (e) { /* storage blocked */ }
-  let base = 'http://raspberrypi.local:8765';
+  let base = 'http://localhost:8765';
   try { base = localStorage.getItem('jasrain_pi_url') || base; } catch (e) { /* storage blocked */ }
   return base.replace(/\/$/, '').replace(/:\d+$/, ':8766');
 };
