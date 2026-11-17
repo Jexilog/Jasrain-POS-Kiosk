@@ -1,0 +1,46 @@
+/* "Are you still there?" notice. Colors come from the page when it has them, and fall back to plain ones. */
+.idleOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(0.3125rem);
+}
+.idleCard {
+  width: min(26rem, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1.8rem 1.5rem 1.6rem;
+  text-align: center;
+  border-radius: 1.75rem;
+  background: var(--colorCardBg, #ffffff);
+  color: var(--colorTextMain, #12212e);
+  border: 2px solid var(--colorCardBorder, #dbe6ee);
+  box-shadow: 0 1.5rem 4.375rem rgba(0, 0, 0, 0.5);
+  animation: idlePop 0.2s ease-out;
+}
+@keyframes idlePop { from { transform: translateY(0.75rem) scale(0.97); opacity: 0; } to { transform: none; opacity: 1; } }
+.idleCard h2 { font-size: 1.6rem; font-weight: 800; margin: 0; }
+.idleCard p { margin: 0; font-size: 1.05rem; opacity: 0.8; }
+.idleRing { position: relative; width: 7.5rem; height: 7.5rem; }
+.idleTrack { fill: none; stroke: var(--colorCardBorder, #dbe6ee); stroke-width: 9; }
+.idleArc { fill: none; stroke: var(--colorBrand, #0ea5e9); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset 0.25s linear; }
+.idleNum { position: absolute; inset: 0; display: grid; place-items: center; font-size: 2.6rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.idleBtn {
+  width: 100%;
+  margin-top: 0.4rem;
+  padding: 1rem 1.2rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  border-radius: 1rem;
+  border: 2px solid var(--colorBrand, #0ea5e9);
+  background: var(--colorBrand, #0ea5e9);
+  color: #fff;
+  cursor: pointer;
+}
+.idleBtn:active { transform: scale(0.97); }

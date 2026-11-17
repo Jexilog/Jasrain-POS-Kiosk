@@ -1,0 +1,7 @@
+/* Everything is sized in rem. main.jsx sets the root font size from the screen width,
+   so a 4:3 / small screen shows the same layout as the 1920x1080 design, with crisp text. */
+html {
+  font-size: var(--root-fs, 16px);
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}

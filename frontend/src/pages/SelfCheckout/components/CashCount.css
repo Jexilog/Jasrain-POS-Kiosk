@@ -1,0 +1,15 @@
+/* the count of coins and bills under "Inserted" */
+.coCount { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.4rem 0 0.6rem; }
+.coCountTotals { display: flex; gap: 1.2rem; font-size: 0.95rem; opacity: 0.85; }
+.coCountTotals b { font-size: 1.05rem; }
+.coCountChips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.coChip {
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: 1.5px solid var(--colorBrand, #0ea5e9);
+  color: var(--colorBrand, #0ea5e9);
+  font-variant-numeric: tabular-nums;
+}
+.coChip.bill { background: var(--colorBrand, #0ea5e9); color: #fff; }
