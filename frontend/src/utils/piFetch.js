@@ -3,10 +3,10 @@
 //   'local'   = this computer (localhost / 127.x)
 //   'private' = another device on the network (192.168.x.x, raspberrypi.local, ...)
 export const piFetch = (url, options = {}) => {
-  let space = 'private';
+  let space = 'local';
   try {
     const host = new URL(url).hostname;
-    if (host === 'localhost' || host.startsWith('127.') || host === '[::1]') space = 'local';
-  } catch (e) { /* keep 'private' */ }
+    if (host === 'localhost' || host.startsWith('127.') || host === '[::1]') space = 'loopback';
+  } catch (e) { /* keep 'local' */ }
   return fetch(url, { ...options, targetAddressSpace: space });
 };
