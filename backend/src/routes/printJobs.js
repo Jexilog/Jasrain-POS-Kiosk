@@ -33,6 +33,9 @@ const toJob = (r) => ({
 
 const SELECT_JOB = `SELECT j.*, (f.job_id IS NOT NULL) AS has_file
                     FROM print_job j LEFT JOIN print_file f ON f.job_id = j.id`;
+const SHOP_NAME = process.env.SHOP_NAME || 'Print Shop';
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const peso = (n) => `₱${Number(n).toFixed(2)}`;
 
 // Customers can see the queue numbers and statuses, nothing else
 router.get('/board', async (req, res) => {
@@ -59,6 +62,7 @@ router.post('/', async (req, res) => {
 
   // the kiosk that makes the job gets a one-time key, and only that key can upload the file
   const uploadToken = crypto.randomBytes(16).toString('hex');
+  const receiptToken = crypto.randomBytes(16).toString('hex');
 
   const id = await transaction(async (conn) => {
     const [[rates]] = await conn.query('SELECT bw_rate, color_rate FROM settings WHERE id = 1');
@@ -74,10 +78,10 @@ router.post('/', async (req, res) => {
 
     const queueNumber = await nextNumber(conn, 'print_job', 'queue_number', 'P');
     const [result] = await conn.query(
-      `INSERT INTO print_job (queue_number, upload_token, file_name, file_size, file_type, pages, copies, color, paper_size,
+      `INSERT INTO print_job (queue_number, upload_token, receipt_token,file_name, file_size, file_type, pages, copies, color, paper_size,
                               total, payment, cash_received, change_amount, change_given)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [queueNumber, uploadToken, String(j.fileName).slice(0, 255), j.fileSize ?? null, j.fileType ?? null, pages, copies, color,
+      [queueNumber, uploadToken, receiptToken,String(j.fileName).slice(0, 255), j.fileSize ?? null, j.fileType ?? null, pages, copies, color,
        j.paperSize || 'Short', total, j.payment || 'Cash', received, change, change === 0]
     );
     return result.insertId;
@@ -85,7 +89,7 @@ router.post('/', async (req, res) => {
 
   const [rows] = await pool.query(`${SELECT_JOB} WHERE j.id = ?`, [id]);
   // the key is only given here, to the kiosk that made the job (the staff list never has it)
-  res.status(201).json({ ...toJob(rows[0]), uploadToken });
+  res.status(201).json({ ...toJob(rows[0]), uploadToken, receiptToken});
 });
 
 // The kiosk sends the file as raw bytes right after creating the job, with the key it was given
@@ -146,6 +150,73 @@ router.delete('/:id', requireAuth, async (req, res) => {
     await conn.query('UPDATE print_job SET archived = TRUE, upload_token = NULL WHERE id = ?', [req.params.id]);
   });
   res.json({ ok: true });
+});
+
+router.get('/:id/receipt', async (req, res) => {
+  const token = String(req.query.token || '');
+  const [rows] = await pool.query('SELECT * FROM print_job WHERE id = ?', [req.params.id]);
+  const j = rows[0];
+
+  const a = Buffer.from(token);
+  const b = Buffer.from(j?.receipt_token || '');
+  if (!j || !token || a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+    throw httpError(404, 'Receipt not found.');
+  }
+
+  const unit = money(j.total / (j.pages * j.copies));
+  const when = new Date(j.created_at).toLocaleString('en-PH', { timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short' });
+  const receipt = {
+    receiptNo: `R-${String(j.id).padStart(6, '0')}`,
+    queueNumber: j.queue_number,
+    date: when,
+    fileName: j.file_name,
+    pages: j.pages,
+    copies: j.copies,
+    color: j.color === 'color' ? 'Color' : 'Black & White',
+    paperSize: j.paper_size,
+    ratePerPage: unit,
+    total: Number(j.total),
+    payment: j.payment,
+    cashReceived: j.cash_received == null ? null : Number(j.cash_received),
+    change: j.change_amount == null ? null : Number(j.change_amount),
+  };
+
+  if (req.query.format === 'json') return res.json(receipt);
+
+  res.set('Cache-Control', 'no-store');
+  res.type('html').send(`<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Receipt ${esc(receipt.receiptNo)}</title>
+<style>
+  body { font: 14px/1.5 monospace; max-width: 320px; margin: 16px auto; padding: 0 12px; color: #000; }
+  h1 { font-size: 18px; text-align: center; margin: 0; }
+  .c { text-align: center; } .r { display: flex; justify-content: space-between; gap: 12px; }
+  hr { border: 0; border-top: 1px dashed #000; margin: 10px 0; }
+  .total { font-weight: bold; font-size: 16px; }
+  .queue { font-size: 28px; font-weight: bold; text-align: center; margin: 8px 0; }
+  button { width: 100%; padding: 10px; margin-top: 14px; font-size: 14px; }
+  @media print { button { display: none; } body { margin: 0; } }
+</style></head><body>
+  <h1>${esc(SHOP_NAME)}</h1>
+  <div class="c">Official Receipt</div>
+  <hr>
+  <div class="r"><span>Receipt no.</span><span>${esc(receipt.receiptNo)}</span></div>
+  <div class="r"><span>Date</span><span>${esc(receipt.date)}</span></div>
+  <div class="queue">${esc(receipt.queueNumber)}</div>
+  <div class="c">Your queue number</div>
+  <hr>
+  <div>${esc(receipt.fileName)}</div>
+  <div class="r"><span>${esc(receipt.pages)} pg × ${esc(receipt.copies)} copy</span><span>${peso(receipt.ratePerPage)}/pg</span></div>
+  <div class="r"><span>${esc(receipt.color)}</span><span>${esc(receipt.paperSize)}</span></div>
+  <hr>
+  <div class="r total"><span>TOTAL</span><span>${peso(receipt.total)}</span></div>
+  <div class="r"><span>Payment</span><span>${esc(receipt.payment)}</span></div>
+  ${receipt.cashReceived != null ? `<div class="r"><span>Cash</span><span>${peso(receipt.cashReceived)}</span></div>
+  <div class="r"><span>Change</span><span>${peso(receipt.change)}</span></div>` : '<div class="c">Please pay at the counter.</div>'}
+  <hr>
+  <div class="c">Thank you!</div>
+  <button onclick="window.print()">Print receipt</button>
+</body></html>`);
 });
 
 export default router;
